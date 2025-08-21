@@ -4,8 +4,7 @@ To prevent resizing issues that make the camera bar excessively large, the size 
 
 Just install the module and activate it in your world to use it.
 
-[resizable-camera-bar.webm](https://github.com/user-attachments/assets/e455a207-1363-4b0b-b48d-2d7275f72873)
-
+![resizable-camera-bar-1](https://github.com/user-attachments/assets/1170f6c0-fbf7-4e26-87a9-07a56e9f2fe8)
 
 Manual Installation via Manifest: https://raw.githubusercontent.com/jacksands/resizable-camera-bar/refs/heads/main/module.json
 
@@ -16,4 +15,4 @@ Manual Installation via Manifest: https://raw.githubusercontent.com/jacksands/re
 legal code: https://creativecommons.org/licenses/by-nc/4.0/
 
 
-![resizable-camera-bar-1](https://github.com/user-attachments/assets/1170f6c0-fbf7-4e26-87a9-07a56e9f2fe8)
+
