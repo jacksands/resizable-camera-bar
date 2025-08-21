@@ -14,3 +14,6 @@ Manual Installation via Manifest: https://raw.githubusercontent.com/jacksands/re
 
 
 legal code: https://creativecommons.org/licenses/by-nc/4.0/
+
+
+![resizable-camera-bar-1](https://github.com/user-attachments/assets/1170f6c0-fbf7-4e26-87a9-07a56e9f2fe8)
