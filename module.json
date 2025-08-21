@@ -1,0 +1,23 @@
+{
+  "id": "resizable-camera-bar",
+  "title": "Resizable Camera Bar",
+  "description": "Permite redimensionar a barra de câmeras arrastando pela Tag no canto inferior direito da borda.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Jack_Sands"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13"
+  },
+  "esmodules": ["resizable.js"],
+   "styles": ["resizable.css"],
+  "url": "https://github.com/jacksands/resizable-camera-bar", 
+  "manifest": "https://raw.githubusercontent.com/jacksands/resizable-camera-bar/refs/heads/main/module.json",
+  "download": "https://github.com/jacksands/resizable-camera-bar/archive/refs/heads/main.zip"
+} 
+
+
+
