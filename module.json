@@ -14,7 +14,10 @@
   },
   "esmodules": ["resizable.js"],
    "styles": ["resizable.css"],
-  "url": "https://https://github.com/jacksands/resizable-camera-bar", 
-  "manifest": "https://github.com/jacksands/resizable-camera-bar/raw/refs/heads/main/module.json",",
+  "url": "https://github.com/jacksands/resizable-camera-bar", 
+  "manifest": "https://github.com/jacksands/resizable-camera-bar/raw/refs/heads/main/module.json",
   "download": "https://github.com/jacksands/resizable-camera-bar/archive/refs/heads/main.zip"
-}
+} 
+
+
+
