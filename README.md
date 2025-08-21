@@ -7,6 +7,9 @@ Just install the module and activate it in your world to use it.
 [resizable-camera-bar.webm](https://github.com/user-attachments/assets/e455a207-1363-4b0b-b48d-2d7275f72873)
 
 
+Manual Installation via Manifest:  https://github.com/jacksands/resizable-camera-bar/raw/refs/heads/main/module.json
+
+
 # **License**
 
 
