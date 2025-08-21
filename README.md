@@ -4,7 +4,6 @@ To prevent resizing issues that make the camera bar excessively large, the size 
 
 Just install the module and activate it in your world to use it.
 
-
 [resizable-camera-bar.webm](https://github.com/user-attachments/assets/e455a207-1363-4b0b-b48d-2d7275f72873)
 
 
