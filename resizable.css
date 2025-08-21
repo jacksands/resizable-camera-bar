@@ -1,0 +1,26 @@
+
+/* camera resize Vertical - limite de 500px para evitar imagens enormes ao trocar a barra de horizontal para vertival */
+
+#camera-views.vertical {
+    resize: horizontal;
+    overflow: auto;
+    max-width: 500px !important;
+}
+
+
+/* camera resize horizontal - limite de 400px para evitar imagens enormes ao trocar a barra de vertival  para horizontal*/
+
+    #camera-views.horizontal {
+
+     resize: Vertical;
+    overflow: auto;
+    max-height: 400px !important;
+      
+}
+
+/* user control ajust wrap*/
+
+#camera-views > .user-controls {
+
+    flex-wrap: wrap;
+}
