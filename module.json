@@ -1,8 +1,8 @@
 {
   "id": "resizable-camera-bar",
   "title": "Resizable Camera Bar",
-  "description": "Permite redimensionar a barra de câmeras arrastando pela Tag no canto inferior direito da borda.",
-  "version": "1.0.1",
+  "description": "Allows you to resize the camera bar by dragging the Tag in the bottom right corner of the border of the camera dock.",
+  "version": "1.0.2",
   "authors": [
     {
       "name": "Jack_Sands"

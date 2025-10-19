@@ -25,11 +25,3 @@
     flex-wrap: wrap;
 }
 
-/* Fazer com que os controles do chat fiquem abaixo da caixa de chat compacta para que não haja sobreposição.*/
-
-#chat-notifications #chat-controls {
-    position: sticky;}
-
-.split-button.vertical {
-    writing-mode: horizontal-tb;
-}
