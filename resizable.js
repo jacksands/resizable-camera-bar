@@ -1,25 +1,47 @@
-// Função para atualizar as variáveis com base na altura do container
+// --- debounce para performance ---
+function debounce(fn, delay = 100) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// --- função que ajusta altura/largura proporcionalmente ---
 function atualizarAlturaCamera(barra) {
   if (!barra) return;
 
-  const altura = barra.offsetHeight; // pega a altura atual da barra
-  barra.style.setProperty("--av-height", altura + "px"); // define a var CSS
-  barra.style.setProperty("--av-width", (altura * 4 / 3) + "px"); // mantém proporção 4:3
+  const altura = barra.offsetHeight;
+  barra.style.setProperty("--av-height", `${altura}px`);
+  barra.style.setProperty("--av-width", `${(altura * 4) / 3}px`);
 }
 
-Hooks.on("ready", () => {
-  // Seleciona as duas barras
+// --- função que monitora redimensionamentos ---
+function monitorarBarra(barra) {
+  if (!barra) return;
+
+  const atualizar = debounce(() => atualizarAlturaCamera(barra), 100);
+  atualizar(); // executa uma vez ao iniciar
+
+  window.addEventListener("resize", atualizar);
+  new ResizeObserver(atualizar).observe(barra);
+}
+
+// --- função principal para iniciar ou reiniciar o sistema ---
+function inicializarBarrasCamera() {
   const barras = document.querySelectorAll("#camera-views.horizontal.top, #camera-views.horizontal.bottom");
+  barras.forEach(monitorarBarra);
+}
 
-  barras.forEach(barra => {
-    // Atualiza ao carregar
-    atualizarAlturaCamera(barra);
+// --- ganchos principais ---
+Hooks.once("ready", inicializarBarrasCamera);
 
-    // Atualiza ao redimensionar janela
-    window.addEventListener("resize", () => atualizarAlturaCamera(barra));
+// --- reanexa quando o Foundry redesenhar as câmeras ---
+Hooks.on("renderCameraViews", inicializarBarrasCamera);
 
-    // Atualiza se a barra for redimensionada manualmente
-    new ResizeObserver(() => atualizarAlturaCamera(barra)).observe(barra);
-  });
+// --- blindagem futura: se algum outro hook interno atualizar a UI ---
+Hooks.on("updateUser", (user, data) => {
+  if (data?.permissions || data?.flags?.webrtc) {
+    inicializarBarrasCamera();
+  }
 });
-
