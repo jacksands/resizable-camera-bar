@@ -9,7 +9,7 @@ function debounce(fn, delay = 100) {
 
 // --- função que ajusta altura/largura proporcionalmente ---
 function atualizarAlturaCamera(barra) {
-  if (!barra) return;
+  if (!barra || barra.id !== "camera-views") return; // <- só atua em #camera-views
 
   const altura = barra.offsetHeight;
   barra.style.setProperty("--av-height", `${altura}px`);
@@ -18,28 +18,32 @@ function atualizarAlturaCamera(barra) {
 
 // --- função que monitora redimensionamentos ---
 function monitorarBarra(barra) {
-  if (!barra) return;
+  if (!barra || barra.id !== "camera-views") return; // <- reforço
 
   const atualizar = debounce(() => atualizarAlturaCamera(barra), 100);
-  atualizar(); // executa uma vez ao iniciar
+  atualizar();
 
   window.addEventListener("resize", atualizar);
   new ResizeObserver(atualizar).observe(barra);
 }
 
-// --- função principal para iniciar ou reiniciar o sistema ---
+// --- inicialização principal ---
 function inicializarBarrasCamera() {
+  // busca SOMENTE as barras de câmera
   const barras = document.querySelectorAll("#camera-views.horizontal.top, #camera-views.horizontal.bottom");
   barras.forEach(monitorarBarra);
 }
 
-// --- ganchos principais ---
+// --- hooks principais ---
 Hooks.once("ready", inicializarBarrasCamera);
 
-// --- reanexa quando o Foundry redesenhar as câmeras ---
-Hooks.on("renderCameraViews", inicializarBarrasCamera);
+// --- reanexa quando Foundry redesenhar as câmeras ---
+Hooks.on("renderCameraViews", (app, html) => {
+  const barra = html[0]?.closest("#camera-views");
+  if (barra) monitorarBarra(barra);
+});
 
-// --- blindagem futura: se algum outro hook interno atualizar a UI ---
+// --- reforço para mudanças de estado do usuário (ex: áudio/vídeo) ---
 Hooks.on("updateUser", (user, data) => {
   if (data?.permissions || data?.flags?.webrtc) {
     inicializarBarrasCamera();
