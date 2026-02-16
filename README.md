@@ -155,3 +155,8 @@ If it happens:
 3. Then switch back to your preferred position.
 
 This has consistently resolved the issue.
+
+
+# **License**
+
+legal code: https://creativecommons.org/licenses/by-nc/4.0/
