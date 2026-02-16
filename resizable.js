@@ -52,57 +52,65 @@ function openModuleSettings() {
 
 // ─── README ──────────────────────────────────────────────────
 
-function readmeHTML() {
-  return `
-  <div class="rcb-readme">
-    <div class="rcb-readme-section">
-      <p>
-        Resize the camera bar by dragging the handle on its <strong>inner edge</strong>
-        — the side facing the canvas. An
-        <i class="fa-regular fa-eye" style="color:#c8a060; opacity:0.8"></i>
-        icon lives inside the bar's own controls area, always visible and never covered
-        by other UI elements.
-      </p>
-    </div>
-    <div class="rcb-readme-section">
-      <div class="rcb-readme-heading"><i class="fas fa-mouse-pointer"></i> How to use</div>
-      <ul>
-        <li><strong>Hover</strong> over the inner edge of the bar to reveal the handle.</li>
-        <li><strong>Drag</strong> the handle to resize the bar.</li>
-        <li><strong>Double-click</strong> the handle to reset to the default size.</li>
-        <li>Your size is <strong>saved per client</strong> and restored on reload.</li>
-        <li>Click the <i class="fa-regular fa-eye"></i> icon inside the bar controls to open Module Settings directly.</li>
-      </ul>
-    </div>
-    <div class="rcb-readme-section">
-      <div class="rcb-readme-heading"><i class="fas fa-sliders-h"></i> Available Settings</div>
-      <ul>
-        <li><strong>Max Width / Max Height:</strong> Size cap for vertical and horizontal bars.</li>
-        <li><strong>Min Size:</strong> Prevents the bar from shrinking too small to use.</li>
-        <li><strong>Aspect Ratio:</strong> 4:3, 16:9, or Free.
-            <em>Note: 16:9 crops images unless your webcam actually streams in widescreen.</em></li>
-        <li><strong>Hide Cameras Without Video:</strong> Hides the slot of any user who is connected but not transmitting video. Reacts in real time — no reload needed. Default: off.</li>
-        <li><strong>Handle Always Visible:</strong> Show the handle without needing to hover.</li>
-        <li><strong>Handle & Icon Color:</strong> Hex code field + color swatch — edit the code or click the swatch to open the system color picker.</li>
-        <li><strong>Handle Opacity:</strong> Opacity when the handle is visible (0.1 – 1.0).</li>
-      </ul>
-    </div>
-    <div class="rcb-readme-footer">
-      <button type="button" id="rcb-open-settings-btn" class="rcb-settings-link">
-        <i class="fas fa-cog"></i> Open Module Settings
-      </button>
-      <p class="rcb-readme-note">You can reopen this README anytime via the button in Module Settings.</p>
-    </div>
-  </div>`;
+async function loadInstructionsHTML() {
+  try {
+    const response = await fetch(`modules/${MODULE_ID}/INSTRUCTIONS.md`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const markdown = await response.text();
+    
+    // Convert markdown to styled HTML for the dialog
+    let html = markdown
+      // Headers - reduced sizes for compact dialog
+      .replace(/^### (.+)$/gm, '<h3 style="color:#c8a060; margin:10px 0 6px; font-size:12px; font-weight:600">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2 style="color:#c8a060; margin:12px 0 8px; font-size:13px; font-weight:600; border-bottom:1px solid #3a3020; padding-bottom:3px">$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1 style="color:#c8a060; margin:0 0 10px; font-size:14px; font-weight:600">$1</h1>')
+      // Bold, italic, code, emoji
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c8a060">$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code style="background:#2a2010; padding:1px 3px; border-radius:2px; font-size:11px">$1</code>')
+      // Horizontal rules
+      .replace(/^---$/gm, '<hr style="border:none; border-top:1px solid #3a3020; margin:10px 0">')
+      // Line breaks
+      .replace(/\n\n/g, '</p><p style="margin:6px 0; color:#b8a080">');
+
+    // Wrap in styled container with more compact spacing
+    html = `<div class="rcb-readme" style="padding:8px 12px; line-height:1.5; font-size:12px">
+      <p style="margin:6px 0; color:#b8a080">${html}</p>
+      <div style="border-top:1px solid #2a2010; padding-top:8px; margin-top:8px; text-align:center">
+        <button type="button" id="rcb-open-settings-btn" class="rcb-settings-link">
+          <i class="fas fa-cog"></i> Open Module Settings
+        </button>
+        <p style="margin-top:6px; font-size:10px; color:#5a4a30">
+          You can reopen these instructions anytime via the button in Module Settings.
+        </p>
+      </div>
+    </div>`;
+
+    return html;
+  } catch (err) {
+    console.error(`${MODULE_ID} | Failed to load INSTRUCTIONS.md:`, err);
+    return `<div style="padding:20px; color:#c8a060">
+      <p>Failed to load instructions.</p>
+      <p style="margin-top:10px; font-size:11px; color:#8a7055">Error: ${err.message}</p>
+    </div>`;
+  }
 }
 
 async function showReadme() {
   const { DialogV2 } = foundry.applications.api;
+  const content = await loadInstructionsHTML();
+
+  // Wrap content in a scrollable container
+  const scrollable = `<div style="max-height:65vh; overflow-y:auto; overflow-x:hidden; padding-right:8px">${content}</div>`;
 
   await DialogV2.wait({
-    window:  { title: "Resizable Camera Bar — README" },
+    window:  { 
+      title: "Resizable Camera Bar — Instructions",
+      positioned: true 
+    },
+    position: { width: 520, height: "auto" },
     classes: ["rcb-dialog"],
-    content: readmeHTML(),
+    content: scrollable,
     buttons: [
       { action: "close", label: "Close", icon: "fas fa-times", default: true },
     ],
@@ -627,8 +635,8 @@ function initAllBars() {
 Hooks.once("init", () => {
 
   game.settings.registerMenu(MODULE_ID, "readme", {
-    name:       "Resizable Camera Bar — README",
-    label:      "Open README",
+    name:       "Resizable Camera Bar — Instructions",
+    label:      "Open Instructions",
     hint:       "View usage instructions and a list of all available settings.",
     icon:       "fas fa-book",
     type:       RCBReadmeMenu,

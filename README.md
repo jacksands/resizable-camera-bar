@@ -1,61 +1,202 @@
 # Resizable Camera Bar
 
-<img width="490" height="925" alt="Screenshot_3" src="https://github.com/user-attachments/assets/fd4dca2a-3340-42d5-9976-1f91f6b7c632" />
+![Resizable Camera Bar Logo](images/screenshot-logo.png)
 
+A **Foundry VTT v13** module that provides intuitive resizing controls for the camera bar with extensive customization options.
 
-A simple module for **Foundry VTT v13** that lets you freely resize the camera bar.
-
-The resize handle sits on the **inner edge** of the bar — between the bar and the canvas. An 👁 eye icon lives inside the bar's own controls area and opens Module Settings directly.
-
-| Bar position | Handle location |
-|---|---|
-| Left | Right edge (facing canvas) |
-| Right | Left edge (facing canvas) |
-| Top | Bottom edge (facing canvas) |
-| Bottom | Top edge (facing canvas) |
+Version 2.0+ introduces improved resizing behavior, automatic camera hiding, real-time visual feedback, and full native compatibility with Foundry's dock minimize feature.
 
 ---
 
-## How to use
+## Features
 
-- **Hover** over the inner edge of the bar to reveal the resize handle.
-- **Drag** the handle to resize the bar.
-- **Double-click** the handle to reset to the default size.
-- Size is **saved per client** and restored on reload.
-- Click the 👁 icon in the camera bar controls to jump directly to Module Settings.
+### 🎯 Intuitive Resize Handle
 
-The eye icon lives inside Foundry's own `.user-controls` area of the camera bar, so it is always visible and never covered by other UI elements.
+The resize handle is positioned on the **inner edge** of the camera bar — the side facing the canvas. The handle location automatically adjusts based on bar position:
+
+| ![Left Bar](images/screenshot-handle-left.png) | ![Top Bar](images/screenshot-handle-top.png) | ![Bottom Bar](images/screenshot-handle-bottom.png) |
+|:---:|:---:|:---:|
+| Left bar → right edge | Top bar → bottom edge | Bottom bar → top edge |
+
+**Key Features:**
+- Handle appears on hover (or always visible via setting)
+- Thin 4px visual, 60% bar length — easy to find
+- Double-click to reset to default size
+- Per-client saved sizes (restore on reload)
+- Respects configured min/max bounds
 
 ---
 
-## Settings
-<img width="810" height="822" alt="Screenshot_7" src="https://github.com/user-attachments/assets/ebe6eb2c-8707-460a-aee6-ee20455922e2" />
+### 👁 Quick Settings Access
 
+An eye icon appears at the outer corner of the camera bar, providing instant access to module settings. Always visible and never covered by other UI elements.
 
+When **Hide Cameras Without Video** is enabled, a ⚠ warning icon appears below the eye icon whenever cameras are hidden. Hover to see the count of hidden cameras.
 
-All settings are **per client** (each player keeps their own preferences).
+---
 
-| Setting | Description | Default |
-|---|---|---|
-| Show README on Startup | Re-enable the first-run popup | On |
-| Maximum Width | Width cap in px for left/right bars | 500 |
-| Maximum Height | Height cap in px for top/bottom bars | 400 |
-| Minimum Size | Prevents the bar from shrinking too small | 80 |
-| Aspect Ratio | 4:3, 16:9 (crops unless source is native 16:9), or Free | 4:3 |
-| Handle Always Visible | Show the handle without hovering | Off |
-| Handle Color | Hex color for handle and eye icon | #c8a060 |
-| Handle Opacity | Opacity when visible (0.1–1.0) | 0.7 |
+### 📹 Hide Cameras Without Video
+
+**Automatically hides** camera slots for users who are connected but not transmitting video. Reacts in real time — no reload needed.
+
+**How it works:**
+- User joins with camera off → slot hidden immediately
+- User turns camera on mid-session → slot reappears instantly
+- User turns camera off → slot hidden
+- Warning icon ⚠ shows count of hidden cameras on hover
+
+**Important notes:**
+- Your own camera slot will also be hidden if you're not transmitting
+- Uses `visibility:hidden` to keep layout stable — cameras don't shift position when hidden
+- Detection uses multiple signals: `no-video` class, `video[hidden]` attribute, `srcObject` state, and video track status
+
+---
+
+### 🎨 Extensive Customization
+
+![Settings Panel](images/screenshot-settings.png)
+
+**Size Controls:**
+- Maximum Width (vertical bars): 100–1000px
+- Maximum Height (horizontal bars): 60–800px  
+- Minimum Size: 40–200px
+
+**Visual Options:**
+- Aspect Ratio: 4:3 (default), 16:9 (widescreen), or Free
+- Handle & Icon Color: Hex field + color picker
+- Handle Opacity: 0.1–1.0
+- Handle Always Visible toggle
+
+![Aspect Ratio Settings](images/screenshot-aspect-ratio.png)
 
 ---
 
 ## Installation
 
+### Method 1: Manifest URL (Recommended)
+
 ```
 https://raw.githubusercontent.com/jacksands/resizable-camera-bar/refs/heads/main/module.json
 ```
+
+1. In Foundry, go to **Add-on Modules**
+2. Click **Install Module**
+3. Paste the manifest URL
+4. Click **Install**
+
+### Method 2: Module Browser
+
+Search for "Resizable Camera Bar" in Foundry's built-in module browser.
+
+---
+
+## Usage
+
+1. **Enable the module** in your world
+2. The resize handle will appear on the inner edge of your camera bar
+3. **Hover** to reveal the handle, then **drag** to resize
+4. Click the 👁 **eye icon** in the camera bar to access settings
+5. Configure options to your preference
+
+### First-Time Setup
+
+All settings have sensible defaults — the module works immediately after activation. The eye icon provides quick access to customization.
+
+### Reload Prompt
+
+Most setting changes apply immediately. When a reload is beneficial, a dialog will appear with options to:
+- **Reload Now** — refresh the page to apply all changes
+- **Continue Without Reloading** (default) — keep working
+
+---
+
+## Compatibility
+
+- **Foundry VTT:** v13+
+- **API:** Uses ApplicationV2, DialogV2, and fully-namespaced SettingsConfig
+- **Native Dock:** Full compatibility with Foundry's minimize feature
+- **AV Systems:** Works with Foundry's native AV and LiveKit
+
+---
+
+## Technical Details
+
+### Architecture
+
+- **Handle positioning:** `position:fixed` with `getBoundingClientRect()` — works regardless of Foundry's layout context
+- **Settings storage:** JSON serialization for complex data (Foundry limitation workaround)
+- **Camera detection:** Multi-signal approach — `no-video` class, `video[hidden]`, `srcObject`, and track state
+- **Real-time updates:** `MutationObserver` with `subtree:true` + video element event listeners
+- **Minimize compatibility:** `MutationObserver` on `.minimized` class calls `clearInlineSize()` to cooperate with Foundry's CSS
+
+### Performance
+
+- Debounced storage writes (400ms)
+- Smooth drag via `requestAnimationFrame`
+- Observer cleanup on bar removal via `WeakMap` tracking
+
+---
+
+## Changelog
+
+### v2.0.0 — Initial Release
+
+**Core Features:**
+- Custom drag handle on inner edge (position adapts to bar location)
+- Thin 4px handle, 60% bar length — easy to find when invisible
+- Double-click handle to reset to default size
+- Per-client size persistence (saved per bar position)
+- Full compatibility with Foundry native dock minimize
+
+**Visual Elements:**
+- Eye icon (👁) at outer corner — always visible, never covered
+- Warning icon (⚠) appears when cameras are hidden with hover tooltip
+- Handle appears on hover (or always visible via setting)
+- Color picker: hex input + native color swatch side-by-side
+
+**Hide Cameras Without Video:**
+- Automatically hides slots of users not transmitting video
+- Multi-signal detection: `srcObject`, track state, `no-video` class, `hidden` attribute
+- Real-time updates via `MutationObserver` + video event listeners
+- Works for users who join mid-session without camera
+- Includes own slot — if not transmitting, hidden for consistency
+
+**Settings:**
+- Maximum Width/Height with configurable ranges
+- Minimum Size protection (prevents bar from disappearing)
+- Aspect Ratio: 4:3 (default), 16:9 (widescreen), or Free
+- Handle customization: color, opacity, always visible toggle
+- Instructions accessible via Module Settings (INSTRUCTIONS.md)
+
+**Technical:**
+- ApplicationV2 / DialogV2 / fully-namespaced SettingsConfig — no deprecation warnings
+- `position:fixed` positioning via `getBoundingClientRect()`
+- JSON serialization for complex settings
+- Observer cleanup via `WeakMap` tracking
+
+---
+
+## Credits
+
+- **Author:** Jack_Sands
+- **Special Thanks:** dineshm72 for requesting size persistence feature
 
 ---
 
 ## License
 
 [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+
+---
+
+## Support
+
+For issues, feature requests, or questions:
+- GitHub Issues: [github.com/jacksands/resizable-camera-bar/issues](https://github.com/jacksands/resizable-camera-bar/issues)
+- Foundry Discord: Find me in the #module-development channel
+
+---
+
+## Screenshots
+
+The module adapts to all camera bar positions and works seamlessly with Foundry v13's native interface.
