@@ -1,55 +1,146 @@
-# Resizable Camera Bar
+# 📷 Resizable Camera – Version 2.0
 
-A simple module for **Foundry VTT v13** that lets you freely resize the camera bar.
+Version 2.0 of **Resizable Camera** introduces improved resizing behavior and several new customization options.
 
-The resize handle sits on the **inner edge** of the bar — between the bar and the canvas. An 👁 eye icon lives inside the bar's own controls area and opens Module Settings directly.
-
-| Bar position | Handle location |
-|---|---|
-| Left | Right edge (facing canvas) |
-| Right | Left edge (facing canvas) |
-| Top | Bottom edge (facing canvas) |
-| Bottom | Top edge (facing canvas) |
+You can now drag and resize the camera bar using a handle located at the center of the bar. The handle always remains centered, regardless of where the bar is positioned on the screen.
 
 ---
 
-## How to use
+## 🔧 Resize Behavior
 
-- **Hover** over the inner edge of the bar to reveal the resize handle.
-- **Drag** the handle to resize the bar.
-- **Double-click** the handle to reset to the default size.
-- Size is **saved per client** and restored on reload.
-- Click the 👁 icon in the camera bar controls to jump directly to Module Settings.
+To prevent resizing issues that could make the camera bar excessively large or small:
 
-The eye icon lives inside Foundry's own `.user-controls` area of the camera bar, so it is always visible and never covered by other UI elements.
+- The size is capped by the **max-width** and **max-height** values defined in the module settings.
+- Limits depend on vertical or horizontal position.
+- The bar will **never be smaller than 40px**, preventing it from disappearing.
 
----
+All **dragged sizes are saved in memory**.
 
-## Settings
-
-All settings are **per client** (each player keeps their own preferences).
-
-| Setting | Description | Default |
-|---|---|---|
-| Show README on Startup | Re-enable the first-run popup | On |
-| Maximum Width | Width cap in px for left/right bars | 500 |
-| Maximum Height | Height cap in px for top/bottom bars | 400 |
-| Minimum Size | Prevents the bar from shrinking too small | 80 |
-| Aspect Ratio | 4:3, 16:9 (crops unless source is native 16:9), or Free | 4:3 |
-| Handle Always Visible | Show the handle without hovering | Off |
-| Handle Color | Hex color for handle and eye icon | #c8a060 |
-| Handle Opacity | Opacity when visible (0.1–1.0) | 0.7 |
+- Settings are stored **per client**.
+- Settings are stored **per bar position**.
+- Thanks to **dineshm72** for requesting this feature.
 
 ---
 
-## Installation
+## 💬 Chat Behavior Adjustment
 
-```
-https://raw.githubusercontent.com/jacksands/resizable-camera-bar/refs/heads/main/module.json
-```
+Chat buttons will now wrap below the chat input field when the right bar is collapsed.
+
+This change was made for **accessibility and ease of use**.
 
 ---
 
-## License
+## ⚙ Default Configuration
 
-[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+All settings include **default values**.
+
+You can:
+
+1. Install the module.
+2. Activate it in your world.
+3. Start using it immediately.
+
+A new icon in the camera bar provides **quick access to module settings**.
+
+---
+
+# 🆕 New Options in Version 2.0
+
+All new options are set to **Foundry’s default behavior** or the simplest configuration by default to prevent unexpected behavior.
+
+---
+
+## 🎥 Camera Aspect Ratio
+
+Some video platforms support widescreen or alternative aspect ratios.
+
+These are now configurable in the settings.
+
+**Important:**
+
+- Proper display depends on the transmitted video feed using the correct ratio.
+- Selecting the wrong ratio may cause cropping.
+
+---
+
+## 👁 Hide Cameras Without Video
+
+This was the **most complex feature implemented so far**.
+
+### Default Foundry Behavior
+
+When a user is connected but not transmitting video, their camera frame remains visible.
+
+### New Behavior
+
+This feature automatically:
+
+- Detects whether a user is transmitting video.
+- Hides their camera if they are not.
+- Restores the camera automatically if transmission resumes.
+
+A **(!)** icon appears when one or more cameras are hidden.
+
+Hover over it to see how many are currently hidden.
+
+### Important Notes
+
+- Your own camera will also be hidden if you are not transmitting.
+- You can control transmission using camera bar settings.
+- You can disable this behavior in module settings.
+- When using this feature for the first time, verify that no one is unintentionally hidden.
+
+---
+
+## 🧲 Handle Always Visible
+
+Makes the resize handle permanently visible instead of appearing only on mouse hover.
+
+---
+
+## 🎨 Color
+
+Changes the color of:
+
+- Icons
+- Resize handle
+
+---
+
+## 🌫 Opacity
+
+Adjusts the opacity of the resize handle only.
+
+---
+
+## 🔄 Reload Pop-up
+
+Most features do not require a reload when settings change.
+
+However, some options do.
+
+When changing settings:
+
+- A small pop-up will ask whether you want to refresh.
+- It will attempt to inform you if reload is required.
+
+If your new settings do not appear to apply:
+
+- Refresh the page.
+- Otherwise cancel if unnecessary.
+
+---
+
+## 🛠 Small (and Slightly Embarrassing) Tip
+
+On rare occasions, the camera frame may disappear or freeze.
+
+The exact cause has not been identified and the issue is uncommon.
+
+If it happens:
+
+1. Change the bar position.
+2. Or refresh the page.
+3. Then switch back to your preferred position.
+
+This has consistently resolved the issue.
