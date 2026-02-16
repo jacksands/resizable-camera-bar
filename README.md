@@ -34,7 +34,7 @@ This change was made for **accessibility and ease of use**.
 <img width="435" height="233" alt="screenshot-handle-bottom" src="https://github.com/user-attachments/assets/8d8ca7ee-2182-4508-8940-dfb2d3a6d298" />
 ---
 
-## ⚙ Default Configuration
+## ⚙ Configuration
 
 <img width="810" height="822" alt="screenshot-settings" src="https://github.com/user-attachments/assets/7f8f40cd-cd49-4808-8402-89b0017223d6" />
 
