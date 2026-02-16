@@ -1,5 +1,8 @@
 # Resizable Camera Bar
 
+<img width="490" height="925" alt="Screenshot_3" src="https://github.com/user-attachments/assets/fd4dca2a-3340-42d5-9976-1f91f6b7c632" />
+
+
 A simple module for **Foundry VTT v13** that lets you freely resize the camera bar.
 
 The resize handle sits on the **inner edge** of the bar — between the bar and the canvas. An 👁 eye icon lives inside the bar's own controls area and opens Module Settings directly.
@@ -26,6 +29,9 @@ The eye icon lives inside Foundry's own `.user-controls` area of the camera bar,
 ---
 
 ## Settings
+<img width="810" height="822" alt="Screenshot_7" src="https://github.com/user-attachments/assets/ebe6eb2c-8707-460a-aee6-ee20455922e2" />
+
+
 
 All settings are **per client** (each player keeps their own preferences).
 
