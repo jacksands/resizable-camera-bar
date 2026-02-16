@@ -1,23 +1,13 @@
 {
   "id": "resizable-camera-bar",
   "title": "Resizable Camera Bar",
-  "description": "Allows you to resize the camera bar by dragging the Tag in the bottom right corner of the border of the camera dock.",
-  "version": "1.0.5",
-  "authors": [
-    {
-      "name": "Jack_Sands"
-    }
-  ],
-  "compatibility": {
-    "minimum": "13",
-    "verified": "13"
-  },
+  "description": "Resize the camera bar by dragging a handle on its inner edge. An eye icon inside the bar controls opens Module Settings directly. Handle z-index matches the bar. Compatible with Foundry native dock minimize.",
+  "version": "2.0.0",
+  "authors": [{ "name": "Jack_Sands" }],
+  "compatibility": { "minimum": "13", "verified": "13" },
   "esmodules": ["resizable.js"],
-   "styles": ["resizable.css"],
-  "url": "https://github.com/jacksands/resizable-camera-bar", 
+  "styles": ["resizable.css"],
+  "url": "https://github.com/jacksands/resizable-camera-bar",
   "manifest": "https://raw.githubusercontent.com/jacksands/resizable-camera-bar/refs/heads/main/module.json",
   "download": "https://github.com/jacksands/resizable-camera-bar/archive/refs/heads/main.zip"
-} 
-
-
-
+}
