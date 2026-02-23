@@ -2,7 +2,7 @@
   "id": "resizable-camera-bar",
   "title": "Resizable Camera Bar",
   "description": "Resize the camera bar by dragging a handle on its inner edge. An eye icon inside the bar controls opens Module Settings directly. Handle z-index matches the bar. Compatible with Foundry native dock minimize.",
-  "version": "2.0.0",
+  "version": "2.0.4",
   "authors": [{ "name": "Jack_Sands" }],
   "compatibility": { "minimum": "13", "verified": "13" },
   "esmodules": ["resizable.js"],

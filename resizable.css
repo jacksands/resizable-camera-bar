@@ -1,5 +1,5 @@
 /* ============================================================
-   Resizable Camera Bar — v2.5.2
+   Resizable Camera Bar — v2.0.4
    ============================================================ */
 
 #camera-views {
@@ -189,3 +189,22 @@ input[type="color"].rcb-color-picker,
 }
 
 .rcb-settings-link i { margin-right: 5px; }
+
+/* ─── Dynamic Hide ──────────────────────────────────────────
+   Usa display: none para colapsar o layout exatamente como a
+   função Hide User nativa faz, mas preserva o nó na memória
+   para permitir que o JS reative a câmera quando a mídia voltar.
+   ─────────────────────────────────────────────────────────── */
+.camera-view.rcb-dynamic-hide {
+  display: none !important;
+}
+
+/* ─── Horizontal Alignment Fix ──────────────────────────────
+   O 'safe' previne que o flexbox corte a primeira câmera à 
+   esquerda e quebre o scrollbar quando a barra estiver cheia.
+   ─────────────────────────────────────────────────────────── */
+#camera-views.horizontal > .scrollable {
+  display: flex;
+  justify-content: safe center;
+  align-items: center;
+}

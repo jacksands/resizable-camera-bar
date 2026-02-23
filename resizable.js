@@ -52,65 +52,57 @@ function openModuleSettings() {
 
 // ─── README ──────────────────────────────────────────────────
 
-async function loadInstructionsHTML() {
-  try {
-    const response = await fetch(`modules/${MODULE_ID}/INSTRUCTIONS.md`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const markdown = await response.text();
-    
-    // Convert markdown to styled HTML for the dialog
-    let html = markdown
-      // Headers - reduced sizes for compact dialog
-      .replace(/^### (.+)$/gm, '<h3 style="color:#c8a060; margin:10px 0 6px; font-size:12px; font-weight:600">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2 style="color:#c8a060; margin:12px 0 8px; font-size:13px; font-weight:600; border-bottom:1px solid #3a3020; padding-bottom:3px">$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1 style="color:#c8a060; margin:0 0 10px; font-size:14px; font-weight:600">$1</h1>')
-      // Bold, italic, code, emoji
-      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c8a060">$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`(.+?)`/g, '<code style="background:#2a2010; padding:1px 3px; border-radius:2px; font-size:11px">$1</code>')
-      // Horizontal rules
-      .replace(/^---$/gm, '<hr style="border:none; border-top:1px solid #3a3020; margin:10px 0">')
-      // Line breaks
-      .replace(/\n\n/g, '</p><p style="margin:6px 0; color:#b8a080">');
-
-    // Wrap in styled container with more compact spacing
-    html = `<div class="rcb-readme" style="padding:8px 12px; line-height:1.5; font-size:12px">
-      <p style="margin:6px 0; color:#b8a080">${html}</p>
-      <div style="border-top:1px solid #2a2010; padding-top:8px; margin-top:8px; text-align:center">
-        <button type="button" id="rcb-open-settings-btn" class="rcb-settings-link">
-          <i class="fas fa-cog"></i> Open Module Settings
-        </button>
-        <p style="margin-top:6px; font-size:10px; color:#5a4a30">
-          You can reopen these instructions anytime via the button in Module Settings.
-        </p>
-      </div>
-    </div>`;
-
-    return html;
-  } catch (err) {
-    console.error(`${MODULE_ID} | Failed to load INSTRUCTIONS.md:`, err);
-    return `<div style="padding:20px; color:#c8a060">
-      <p>Failed to load instructions.</p>
-      <p style="margin-top:10px; font-size:11px; color:#8a7055">Error: ${err.message}</p>
-    </div>`;
-  }
+function readmeHTML() {
+  return `
+  <div class="rcb-readme">
+    <div class="rcb-readme-section">
+      <p>
+        Resize the camera bar by dragging the handle on its <strong>inner edge</strong>
+        — the side facing the canvas. An
+        <i class="fa-regular fa-eye" style="color:#c8a060; opacity:0.8"></i>
+        icon lives inside the bar's own controls area, always visible and never covered
+        by other UI elements.
+      </p>
+    </div>
+    <div class="rcb-readme-section">
+      <div class="rcb-readme-heading"><i class="fas fa-mouse-pointer"></i> How to use</div>
+      <ul>
+        <li><strong>Hover</strong> over the inner edge of the bar to reveal the handle.</li>
+        <li><strong>Drag</strong> the handle to resize the bar.</li>
+        <li><strong>Double-click</strong> the handle to reset to the default size.</li>
+        <li>Your size is <strong>saved per client</strong> and restored on reload.</li>
+        <li>Click the <i class="fa-regular fa-eye"></i> icon inside the bar controls to open Module Settings directly.</li>
+      </ul>
+    </div>
+    <div class="rcb-readme-section">
+      <div class="rcb-readme-heading"><i class="fas fa-sliders-h"></i> Available Settings</div>
+      <ul>
+        <li><strong>Max Width / Max Height:</strong> Size cap for vertical and horizontal bars.</li>
+        <li><strong>Min Size:</strong> Prevents the bar from shrinking too small to use.</li>
+        <li><strong>Aspect Ratio:</strong> 4:3, 16:9, or Free.
+            <em>Note: 16:9 crops images unless your webcam actually streams in widescreen.</em></li>
+        <li><strong>Hide Cameras Without Video:</strong> Hides the slot of any user who is connected but not transmitting video. Reacts in real time — no reload needed. Default: off.</li>
+        <li><strong>Handle Always Visible:</strong> Show the handle without needing to hover.</li>
+        <li><strong>Handle & Icon Color:</strong> Hex code field + color swatch — edit the code or click the swatch to open the system color picker.</li>
+        <li><strong>Handle Opacity:</strong> Opacity when the handle is visible (0.1 – 1.0).</li>
+      </ul>
+    </div>
+    <div class="rcb-readme-footer">
+      <button type="button" id="rcb-open-settings-btn" class="rcb-settings-link">
+        <i class="fas fa-cog"></i> Open Module Settings
+      </button>
+      <p class="rcb-readme-note">You can reopen this README anytime via the button in Module Settings.</p>
+    </div>
+  </div>`;
 }
 
 async function showReadme() {
   const { DialogV2 } = foundry.applications.api;
-  const content = await loadInstructionsHTML();
-
-  // Wrap content in a scrollable container
-  const scrollable = `<div style="max-height:65vh; overflow-y:auto; overflow-x:hidden; padding-right:8px">${content}</div>`;
 
   await DialogV2.wait({
-    window:  { 
-      title: "Resizable Camera Bar — Instructions",
-      positioned: true 
-    },
-    position: { width: 520, height: "auto" },
+    window:  { title: "Resizable Camera Bar — README" },
     classes: ["rcb-dialog"],
-    content: scrollable,
+    content: readmeHTML(),
     buttons: [
       { action: "close", label: "Close", icon: "fas fa-times", default: true },
     ],
@@ -122,15 +114,11 @@ async function showReadme() {
   });
 }
 
-// registerMenu type must be an Application subclass.
-// ApplicationV2 is the correct V2 base — no deprecation warning.
 class RCBReadmeMenu extends foundry.applications.api.ApplicationV2 {
   static DEFAULT_OPTIONS = {
     id:     "rcb-readme-menu",
     window: { title: "Resizable Camera Bar" },
   };
-  // _renderHTML is required by ApplicationV2 but we never actually render this app —
-  // render() is overridden to open the README dialog directly.
   async _renderHTML() { return ""; }
   async render() { showReadme(); }
 }
@@ -185,15 +173,9 @@ function applyAspectRatio(bar, size) {
   }
 }
 
-
-
 // ─── Fixed bar icons (eye + warning) ─────────────────────────
-//
-// Both icons live on document.body as position:fixed, positioned
-// at the outer corner of the bar — same approach as the handle.
-// This is reliable regardless of how many camera slots are visible.
 
-const _barIcons = new WeakMap(); // bar → { eye, warn }
+const _barIcons = new WeakMap();
 
 function getBarIcons(bar) {
   if (!_barIcons.has(bar)) _barIcons.set(bar, {});
@@ -207,8 +189,6 @@ function removeBarIcons(bar) {
   _barIcons.set(bar, {});
 }
 
-// Position both icons at the outer corner of the bar (away from canvas),
-// stacked vertically: eye on top, warning below.
 function positionBarIcons(bar) {
   const pos   = getPosition(bar);
   if (!pos) return;
@@ -223,7 +203,6 @@ function positionBarIcons(bar) {
     return;
   }
   if (icons.eye)  icons.eye.style.display  = "flex";
-  // warn visibility is controlled by updateWarningIcon
 
   let x, y1, y2;
   switch (pos) {
@@ -271,7 +250,6 @@ function createBarIcons(bar) {
   const color = get("handleColor");
   const zIdx  = String(getBarZIndex(bar) + 1);
 
-  // ── Eye icon ──
   const eye = document.createElement("button");
   eye.className = "rcb-eye-btn";
   eye.title     = "Resizable Camera Bar — Open Module Settings";
@@ -284,7 +262,6 @@ function createBarIcons(bar) {
     openModuleSettings();
   });
 
-  // ── Warning icon ──
   const warn = document.createElement("button");
   warn.className = "rcb-warn-btn";
   warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
@@ -302,12 +279,10 @@ function createBarIcons(bar) {
   positionBarIcons(bar);
 }
 
-// Update warning icon visibility and tooltip text.
 function updateWarningIcon(bar) {
   const icons = getBarIcons(bar);
   if (!icons.warn) return;
 
-  // Count slots hidden: hideNoVideo on + camera is off
   let count = 0;
   if (get("hideNoVideo")) {
     bar.querySelectorAll(".camera-view[data-user]").forEach(view => {
@@ -326,15 +301,9 @@ function updateWarningIcon(bar) {
   positionBarIcons(bar);
 }
 
+// ─── Handle ──────────────────────────────────────────────────
 
-// ─── Handle (position: fixed on body, z-index = bar's z-index + 1) ───
-//
-// The handle MUST live outside the bar DOM (fixed on body) so it can
-// visually overlap the inner edge without being clipped by the bar's
-// overflow. Its z-index is set to match the bar's own stacking level
-// so it doesn't float above dialogs, notifications, or other UI.
-
-const _handles = new WeakMap(); // bar → handle element
+const _handles = new WeakMap();
 
 function getBarZIndex(bar) {
   const z = parseInt(window.getComputedStyle(bar).zIndex);
@@ -354,11 +323,8 @@ function positionHandle(bar, handle) {
   const edge = innerEdge(pos);
   const rect = bar.getBoundingClientRect();
 
-  // z-index: match the bar, not the whole page
   handle.style.zIndex = String(getBarZIndex(bar) + 1);
 
-  // 4px thick (visually thin) × 60% of the bar's relevant dimension (long, easy to find).
-  // Long length means the cursor change zone is large even when the handle is invisible.
   if (edge === "right") {
     const len = Math.round(rect.height * 0.6);
     handle.style.left   = `${rect.right - 4}px`;
@@ -391,7 +357,6 @@ function positionHandle(bar, handle) {
 }
 
 function createHandle(bar) {
-  // Remove old handle
   _handles.get(bar)?.remove();
 
   const pos = getPosition(bar);
@@ -487,34 +452,21 @@ function cleanupObservers(bar) {
 }
 
 // ─── Hide no-video cameras ───────────────────────────────────
-//
-// Detection strategy (all checked, any one is enough to hide):
-//   1. .camera-view.no-video        — Foundry class (settles after AV init)
-//   2. video[hidden]                — Foundry attribute (set in some versions)
-//   3. video.srcObject === null     — most reliable at load time: stream not attached yet
-//   4. srcObject has no active video tracks — stream attached but video track disabled/ended
-//
-// This covers: users who load with camera off, users who join mid-session without camera,
-// and users who turn camera off during a session.
 
 function isCameraOff(view) {
   if (view.classList.contains("no-video")) return true;
   const video = view.querySelector("video.user-camera");
-  if (!video) return true;        // no video element at all
-  if (video.hidden) return true;  // Foundry hid the element
+  if (!video) return true;
+  if (video.hidden) return true;
 
-  // srcObject is the most direct signal — null means no stream attached
   const src = video.srcObject;
   if (!src) return true;
 
-  // Stream exists but may have no active video tracks
   const tracks = typeof src.getVideoTracks === "function" ? src.getVideoTracks() : [];
   if (tracks.length === 0) return true;
   return tracks.every(t => !t.enabled || t.readyState === "ended");
 }
 
-// Attach play/emptied/loadedmetadata listeners to video elements so we react
-// immediately when a stream starts or stops — without relying on DOM mutations.
 function attachVideoListeners(bar) {
   bar.querySelectorAll("video.user-camera").forEach(video => {
     if (video._rcbListened) return;
@@ -531,9 +483,18 @@ function applyNoVideoVisibility(bar) {
   const hide = get("hideNoVideo");
   bar.querySelectorAll(".camera-view[data-user]").forEach(view => {
     if (!view.dataset.user) return;
-    view.style.visibility = (hide && isCameraOff(view)) ? "hidden" : "";
+    
+    // A implementação via "display: none" acionada por essa classe anula o gap flexbox,
+    // garantindo colapso total (idêntico à UI de hide nativa) SEM destruir o nó DOM,
+    // o que preserva os eventos Play/Pause intactos na memória.
+    if (hide && isCameraOff(view)) {
+      view.classList.add("rcb-dynamic-hide");
+    } else {
+      view.classList.remove("rcb-dynamic-hide");
+    }
   });
-  attachVideoListeners(bar); // wire up any new video elements
+  
+  attachVideoListeners(bar);
   updateWarningIcon(bar);
 }
 
@@ -554,12 +515,9 @@ function initBar(bar) {
 
   createHandle(bar);
   createBarIcons(bar);
-  applyNoVideoVisibility(bar); // also calls attachVideoListeners
-  attachVideoListeners(bar);   // explicit call for elements already in DOM at init
+  applyNoVideoVisibility(bar);
+  attachVideoListeners(bar);
 
-  // Foundry applies AV classes asynchronously after the bar renders.
-  // Users who join with camera already off will have no-video set AFTER initBar runs.
-  // Re-check at 500ms and 1500ms to catch the settled state.
   setTimeout(() => applyNoVideoVisibility(bar), 500);
   setTimeout(() => applyNoVideoVisibility(bar), 1500);
 
@@ -573,8 +531,6 @@ function initBar(bar) {
   window.addEventListener("resize", onWinResize);
   _windowHandlers.set(bar, onWinResize);
 
-  // Observer 1: watches only the bar element for class changes
-  // (orientation change, Foundry minimize/expand)
   const mo = new MutationObserver(debounce((mutations) => {
     const barClassChanged = mutations.some(
       m => m.target === bar && m.attributeName === "class"
@@ -598,11 +554,8 @@ function initBar(bar) {
   mo.observe(bar, { attributes: true, attributeFilter: ["class"] });
   _mutationObservers.set(bar, mo);
 
-  // Observer 2: watches subtree for class/attribute/DOM changes.
-  // childList:true catches new .camera-view slots added when a user joins mid-session.
-  // attributeFilter catches class="no-video" and video[hidden] changes.
   const moVideo = new MutationObserver(debounce(() => {
-    applyNoVideoVisibility(bar); // also calls attachVideoListeners internally
+    applyNoVideoVisibility(bar);
   }, 80));
   moVideo.observe(bar, {
     subtree:         true,
@@ -610,7 +563,6 @@ function initBar(bar) {
     attributeFilter: ["class", "hidden"],
     childList:       true,
   });
-  // Store second observer alongside the first (reuse same WeakMap with a wrapper)
   const existingMo = _mutationObservers.get(bar);
   _mutationObservers.set(bar, {
     disconnect: () => { existingMo.disconnect(); moVideo.disconnect(); }
@@ -635,8 +587,8 @@ function initAllBars() {
 Hooks.once("init", () => {
 
   game.settings.registerMenu(MODULE_ID, "readme", {
-    name:       "Resizable Camera Bar — Instructions",
-    label:      "Open Instructions",
+    name:       "Resizable Camera Bar — README",
+    label:      "Open README",
     hint:       "View usage instructions and a list of all available settings.",
     icon:       "fas fa-book",
     type:       RCBReadmeMenu,
@@ -709,10 +661,24 @@ Hooks.once("init", () => {
 // ─── Hooks ───────────────────────────────────────────────────
 
 Hooks.once("ready", () => {
+  // Atendendo ao requisito de Limpeza: Desfazer "Hide User" nativos herdados de sessões anteriores.
+  // Se a automação estiver ligada, garantimos que a API nativa não travou o jogador fora do DOM.
+  if (get("hideNoVideo") && game.webrtc?.settings) {
+    try {
+      game.users.forEach(u => {
+        const current = game.webrtc.settings.getUser(u.id);
+        if (current?.hidden) {
+          game.webrtc.settings.setUser(u.id, { hidden: false });
+        }
+      });
+    } catch (e) {
+      console.error(`${MODULE_ID} | Falha ao limpar configurações nativas herdadas:`, e);
+    }
+  }
+
   initAllBars();
 });
 
-// Track if any of our settings changed during a settings session
 let _settingsChanged = false;
 
 function _injectColorPicker(root) {
@@ -720,7 +686,6 @@ function _injectColorPicker(root) {
                 ?? root?.querySelector(`[data-tab="${MODULE_ID}"]`);
   if (!section) return false;
 
-  // Attach change listener if not already done
   if (!section._rcbChangeListened) {
     section.addEventListener("change", () => { _settingsChanged = true; }, { passive: true });
     section._rcbChangeListened = true;
@@ -730,16 +695,13 @@ function _injectColorPicker(root) {
   if (!textInput || textInput._rcbPickerInjected) return true;
   textInput._rcbPickerInjected = true;
 
-  // Wrap text input + color swatch in a flex row
   const wrapper = document.createElement("div");
   wrapper.style.cssText = "display:flex; align-items:center; gap:6px;";
   textInput.parentNode.insertBefore(wrapper, textInput);
   wrapper.appendChild(textInput);
 
-  // Style the existing text input to show hex code
   textInput.style.cssText = "flex:1; min-width:0; font-family:monospace; font-size:12px;";
 
-  // Color swatch — clicking opens the system color picker
   const swatch = document.createElement("input");
   swatch.type  = "color";
   swatch.value = textInput.value || "#c8a060";
@@ -754,13 +716,11 @@ function _injectColorPicker(root) {
     "flex-shrink:0",
   ].join(";");
 
-  // Keep in sync: picker → text
   swatch.addEventListener("input", () => {
     textInput.value = swatch.value;
     textInput.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
-  // Keep in sync: text → picker (validate hex first)
   textInput.addEventListener("input", () => {
     const v = textInput.value.trim();
     if (/^#[0-9a-fA-F]{6}$/.test(v)) swatch.value = v;
@@ -775,15 +735,12 @@ Hooks.on("renderSettingsConfig", (_app, html) => {
 
   const root = html instanceof jQuery ? html[0] : html;
 
-  // Watch for any input change inside our module's settings section
   const section = root?.querySelector(`section[data-tab="${MODULE_ID}"]`)
                 ?? root?.querySelector(`[data-tab="${MODULE_ID}"]`);
   if (section) {
     section.addEventListener("change", () => { _settingsChanged = true; }, { passive: true });
   }
 
-  // Replace handleColor text input with native color picker.
-  // In v13 tabbed settings the section may not be in the DOM yet — poll for it.
   if (!_injectColorPicker(root)) {
     let attempts = 0;
     const poll = setInterval(() => {
@@ -830,14 +787,21 @@ Hooks.on("renderCameraViews", (_app, html) => {
   if (bar) initBar(bar);
 });
 
-// Fires whenever a user connects OR disconnects.
-// When someone joins with camera already off, Foundry re-renders the camera bar
-// but the no-video class is applied asynchronously after render.
-// Re-check at intervals to catch the settled state.
-Hooks.on("userConnected", (_user, _connected) => {
+Hooks.on("userConnected", (user, connected) => {
+  // Limpeza Oficial individual (se alguém ligar no meio da sessão com dados legados)
+  if (connected && get("hideNoVideo") && game.webrtc?.settings) {
+    try {
+      const current = game.webrtc.settings.getUser(user.id);
+      if (current?.hidden) {
+        game.webrtc.settings.setUser(user.id, { hidden: false });
+      }
+    } catch (e) {
+      // safe fallback se a API sofrer mudanças no Foundry
+    }
+  }
+
   const bar = document.querySelector("#camera-views");
   if (!bar) return;
-  // AV state settles at different speeds — stagger re-checks
   const check = () => { applyNoVideoVisibility(bar); attachVideoListeners(bar); };
   setTimeout(check, 300);
   setTimeout(check, 1000);
