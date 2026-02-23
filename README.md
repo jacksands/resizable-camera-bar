@@ -99,7 +99,8 @@ Hover over it to see how many are currently hidden.
 - Your own camera will also be hidden if you are not transmitting.
 - You can control transmission using camera bar settings.
 - You can disable this behavior in module settings.
-- When using this feature for the first time, verify that no one is unintentionally hidden.
+- When using this feature for the first time, verify that no one is unintentionally hidden, as it has been difficult to implement.
+- Thanks to [brunocalado](https://github.com/brunocalado)  for the help solving some unwanted behavior in the hide camera feature!
 
 ---
 
