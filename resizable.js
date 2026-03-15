@@ -1,5 +1,5 @@
 // ============================================================
-// Resizable Camera Bar — v2.5.2
+// Resizable Camera Bar — v2.0.55
 // ============================================================
 
 const MODULE_ID = "resizable-camera-bar";
@@ -38,7 +38,8 @@ function get(key) { return game.settings.get(MODULE_ID, key); }
 // ─── Open Module Settings — navigate directly to our tab ─────
 
 function openModuleSettings() {
-  new foundry.applications.settings.SettingsConfig().render(true);
+  // Em ApplicationV2 (v13), render() não aceita booleano — usa { force: true }
+  new foundry.applications.settings.SettingsConfig().render({ force: true });
   const tryClick = (attempts = 0) => {
     if (attempts > 20) return;
     const tabBtn = document.querySelector(
@@ -100,42 +101,85 @@ async function showReadme() {
   const { DialogV2 } = foundry.applications.api;
 
   await DialogV2.wait({
-    window:  { title: "Resizable Camera Bar — README" },
+    window:  { title: "Resizable Camera Bar — README", resizable: true },
     classes: ["rcb-dialog"],
     content: readmeHTML(),
+    position: { width: 560, height: 520 },
     buttons: [
       { action: "close", label: "Close", icon: "fas fa-times", default: true },
     ],
     render: (arg1, arg2) => {
-      const root = arg2?.element ?? arg1?.element ?? document.querySelector(".rcb-dialog");
-      root?.querySelector("#rcb-open-settings-btn")
+      // arg2 é a instância do DialogV2 em v13; arg1 pode ser o event
+      const dialog = arg2 ?? arg1;
+      const appEl  = dialog?.element ?? document.querySelector(".rcb-dialog");
+      if (!appEl) return;
+
+      // Conecta botão de settings
+      appEl.querySelector("#rcb-open-settings-btn")
         ?.addEventListener("click", () => openModuleSettings());
+
+      // Remove padding do window-content para controle total do layout
+      const wc = appEl.querySelector(".window-content");
+      if (wc) {
+        wc.style.setProperty("padding",  "0",      "important");
+        wc.style.setProperty("overflow", "hidden", "important");
+      }
+
+      // Aplica altura real ao scroll wrapper (padrão learn-002)
+      function recalc() {
+        const wcEl  = appEl.querySelector(".window-content");
+        const btnEl = appEl.querySelector(".dialog-buttons");
+        const scrEl = appEl.querySelector(".rcb-readme");
+        if (!wcEl || !scrEl) return;
+        const h = wcEl.clientHeight - (btnEl?.offsetHeight ?? 0);
+        scrEl.style.setProperty("height",     Math.max(h, 100) + "px", "important");
+        scrEl.style.setProperty("max-height", Math.max(h, 100) + "px", "important");
+        scrEl.style.setProperty("overflow-y", "scroll",  "important");
+        scrEl.style.setProperty("overflow-x", "hidden",  "important");
+        scrEl.style.setProperty("flex",       "none",    "important");
+      }
+      requestAnimationFrame(() => recalc());
+      new ResizeObserver(recalc).observe(appEl);
     },
   });
 }
 
+// registerMenu em v13 exige subclasse de ApplicationV2.
+// ApplicationV2 puro tem _renderHTML e _replaceHTML como métodos abstratos.
+// Implementamos os dois manualmente com stubs mínimos — não queremos renderizar
+// nada, apenas interceptar _onRender para abrir o DialogV2 do README.
 class RCBReadmeMenu extends foundry.applications.api.ApplicationV2 {
   static DEFAULT_OPTIONS = {
     id:     "rcb-readme-menu",
     window: { title: "Resizable Camera Bar" },
   };
-  async _renderHTML() { return ""; }
-  async render() { showReadme(); }
+  // Contrato mínimo: _renderHTML retorna o dado que _replaceHTML vai receber.
+  async _renderHTML()           { return null; }
+  // Contrato mínimo: _replaceHTML não precisa fazer nada (não há DOM para atualizar).
+  async _replaceHTML()          {}
+  async _onRender(_ctx, _opts) {
+    // Fecha a janela vazia antes que o Foundry tente mostrá-la,
+    // depois abre o README via DialogV2.
+    this.close({ animate: false });
+    showReadme();
+  }
 }
 
 // ─── Saved sizes ─────────────────────────────────────────────
 
 const _saveSize = debounce((pos, size) => {
   try {
-    const sizes = JSON.parse(get("savedSizes")) || {};
+    // game.settings.get retorna o objeto diretamente (type: Object).
+    // Copia rasa para não mutar o objeto retornado pelo Foundry.
+    const sizes = Object.assign({}, get("savedSizes"));
     sizes[pos] = size;
-    game.settings.set(MODULE_ID, "savedSizes", JSON.stringify(sizes));
+    game.settings.set(MODULE_ID, "savedSizes", sizes);
   } catch (e) { console.warn(`${MODULE_ID} | save size error:`, e); }
 }, 400);
 
 function loadSize(pos) {
   try {
-    const sizes = JSON.parse(get("savedSizes")) || {};
+    const sizes = get("savedSizes") ?? {};
     return typeof sizes[pos] === "number" ? sizes[pos] : defaultSize(pos);
   } catch (_) { return defaultSize(pos); }
 }
@@ -509,6 +553,11 @@ function initBar(bar) {
     return;
   }
 
+  // Limpar observers e handlers ANTES de criar os novos elementos.
+  // Se initBar for chamado duas vezes (ex: renderCameraViews + closeSettingsConfig),
+  // evita observers duplicados rodando em paralelo.
+  cleanupObservers(bar);
+
   if (!isFoundryMinimized(bar)) {
     applySize(bar, pos, loadSize(pos));
   }
@@ -521,8 +570,6 @@ function initBar(bar) {
   setTimeout(() => applyNoVideoVisibility(bar), 500);
   setTimeout(() => applyNoVideoVisibility(bar), 1500);
 
-  cleanupObservers(bar);
-
   const onWinResize = debounce(() => {
     const h = _handles.get(bar);
     if (h) positionHandle(bar, h);
@@ -531,7 +578,8 @@ function initBar(bar) {
   window.addEventListener("resize", onWinResize);
   _windowHandlers.set(bar, onWinResize);
 
-  const mo = new MutationObserver(debounce((mutations) => {
+  // MutationObserver 1: mudanças de classe no próprio bar (minimize/dock/posição).
+  const moClass = new MutationObserver(debounce((mutations) => {
     const barClassChanged = mutations.some(
       m => m.target === bar && m.attributeName === "class"
     );
@@ -551,21 +599,38 @@ function initBar(bar) {
       }
     }
   }, 80));
-  mo.observe(bar, { attributes: true, attributeFilter: ["class"] });
-  _mutationObservers.set(bar, mo);
+  moClass.observe(bar, { attributes: true, attributeFilter: ["class"] });
 
-  const moVideo = new MutationObserver(debounce(() => {
+  // MutationObserver 2: mudanças internas (câmeras entrando/saindo, classes av/no-video).
+  // IMPORTANTE: filtra mutações causadas pelo próprio módulo (rcb-dynamic-hide),
+  // evitando o loop: applyNoVideoVisibility adiciona classe → observer dispara → applyNoVideoVisibility...
+  const moVideo = new MutationObserver(debounce((mutations) => {
+    const onlyOwnClass = mutations.every(m =>
+      m.type === "attributes" &&
+      m.attributeName === "class" &&
+      m.target instanceof Element &&
+      // Ignora se a única mudança foi adicionar/remover nossa própria classe
+      (() => {
+        const prev = m.oldValue ?? "";
+        const curr = m.target.className ?? "";
+        const normalize = s => s.replace(/\brcb-dynamic-hide\b/g, "").replace(/\s+/g, " ").trim();
+        return normalize(prev) === normalize(curr);
+      })()
+    );
+    if (onlyOwnClass) return;
     applyNoVideoVisibility(bar);
   }, 80));
   moVideo.observe(bar, {
-    subtree:         true,
-    attributes:      true,
-    attributeFilter: ["class", "hidden"],
-    childList:       true,
+    subtree:          true,
+    attributes:       true,
+    attributeFilter:  ["class", "hidden"],
+    attributeOldValue: true,
+    childList:        true,
   });
-  const existingMo = _mutationObservers.get(bar);
+
+  // Armazena os dois observers juntos num único wrapper para cleanup uniforme.
   _mutationObservers.set(bar, {
-    disconnect: () => { existingMo.disconnect(); moVideo.disconnect(); }
+    disconnect: () => { moClass.disconnect(); moVideo.disconnect(); }
   });
 
   const ro = new ResizeObserver(debounce(() => {
@@ -596,35 +661,39 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, "savedSizes", {
-    scope: "client", config: false, type: String,
-    default: JSON.stringify({ left: 200, right: 200, top: 180, bottom: 180 }),
+    // type: Object — o Foundry faz parse/validação internamente.
+    // scope: "client" (localStorage) é intencional: escrito em cada frame do drag via rAF,
+    // o que seria inaceitável com scope "user" (round-trip ao servidor por frame).
+    scope: "client", config: false, type: Object,
+    default: { left: 200, right: 200, top: 180, bottom: 180 },
   });
 
   game.settings.register(MODULE_ID, "maxWidth", {
     name:    "Maximum Width (vertical bars)",
     hint:    "Maximum width in pixels for left/right camera bars. Default: 500.",
-    scope:   "client", config: true, type: Number, default: 500,
+    // scope "user": salvo no documento do usuário no servidor — sincroniza entre dispositivos.
+    scope:   "user", config: true, type: Number, default: 500,
     range:   { min: 100, max: 1000, step: 10 },
   });
 
   game.settings.register(MODULE_ID, "maxHeight", {
     name:    "Maximum Height (horizontal bars)",
     hint:    "Maximum height in pixels for top/bottom camera bars. Default: 400.",
-    scope:   "client", config: true, type: Number, default: 400,
+    scope:   "user", config: true, type: Number, default: 400,
     range:   { min: 60, max: 800, step: 10 },
   });
 
   game.settings.register(MODULE_ID, "minSize", {
     name:    "Minimum Size",
     hint:    "Minimum width/height in pixels. Prevents the bar from becoming too small. Default: 80.",
-    scope:   "client", config: true, type: Number, default: 80,
+    scope:   "user", config: true, type: Number, default: 80,
     range:   { min: 40, max: 200, step: 5 },
   });
 
   game.settings.register(MODULE_ID, "aspectRatio", {
     name:    "Camera Aspect Ratio",
     hint:    "Controls the --av-width/--av-height CSS variables. 16:9 may crop images if your webcam does not natively stream in widescreen.",
-    scope:   "client", config: true, type: String, default: "4:3",
+    scope:   "user", config: true, type: String, default: "4:3",
     choices: {
       "4:3":  "4:3 (Default)",
       "16:9": "16:9 (Widescreen — crops unless source is native 16:9)",
@@ -635,25 +704,25 @@ Hooks.once("init", () => {
   game.settings.register(MODULE_ID, "hideNoVideo", {
     name:    "Hide Cameras Without Video",
     hint:    "Automatically hide the slot of any user who is connected but has their camera disabled. Reacts in real time — no reload needed. Default: off.",
-    scope:   "client", config: true, type: Boolean, default: false,
+    scope:   "user", config: true, type: Boolean, default: false,
   });
 
   game.settings.register(MODULE_ID, "handleAlwaysVisible", {
     name:    "Handle Always Visible",
     hint:    "Show the resize handle at all times instead of only on hover. Default: off.",
-    scope:   "client", config: true, type: Boolean, default: false,
+    scope:   "user", config: true, type: Boolean, default: false,
   });
 
   game.settings.register(MODULE_ID, "handleColor", {
     name:    "Handle & Icon Color",
     hint:    "Color for the resize handle and the eye/warning icons. Enter a hex code or click the swatch to pick. Default: amber (#c8a060).",
-    scope:   "client", config: true, type: String, default: "#c8a060",
+    scope:   "user", config: true, type: String, default: "#c8a060",
   });
 
   game.settings.register(MODULE_ID, "handleOpacity", {
     name:    "Handle Opacity",
     hint:    "Opacity of the handle when visible. 0.1 = very faint, 1.0 = fully opaque. Default: 0.7.",
-    scope:   "client", config: true, type: Number, default: 0.7,
+    scope:   "user", config: true, type: Number, default: 0.7,
     range:   { min: 0.1, max: 1.0, step: 0.05 },
   });
 });
@@ -661,21 +730,8 @@ Hooks.once("init", () => {
 // ─── Hooks ───────────────────────────────────────────────────
 
 Hooks.once("ready", () => {
-  // Atendendo ao requisito de Limpeza: Desfazer "Hide User" nativos herdados de sessões anteriores.
-  // Se a automação estiver ligada, garantimos que a API nativa não travou o jogador fora do DOM.
-  if (get("hideNoVideo") && game.webrtc?.settings) {
-    try {
-      game.users.forEach(u => {
-        const current = game.webrtc.settings.getUser(u.id);
-        if (current?.hidden) {
-          game.webrtc.settings.setUser(u.id, { hidden: false });
-        }
-      });
-    } catch (e) {
-      console.error(`${MODULE_ID} | Falha ao limpar configurações nativas herdadas:`, e);
-    }
-  }
-
+  // A abordagem CSS (rcb-dynamic-hide) funciona independentemente de estado persistente.
+  // Limpeza de API nativa removida pois game.webrtc.settings.setUser não existe em todas as versões.
   initAllBars();
 });
 
@@ -733,7 +789,8 @@ function _injectColorPicker(root) {
 Hooks.on("renderSettingsConfig", (_app, html) => {
   _settingsChanged = false;
 
-  const root = html instanceof jQuery ? html[0] : html;
+  // Em ApplicationV2 (v13), html é sempre HTMLElement — sem jQuery.
+  const root = html instanceof HTMLElement ? html : html?.[0] ?? html;
 
   const section = root?.querySelector(`section[data-tab="${MODULE_ID}"]`)
                 ?? root?.querySelector(`[data-tab="${MODULE_ID}"]`);
@@ -780,26 +837,18 @@ Hooks.on("closeSettingsConfig", () => {
 });
 
 Hooks.on("renderCameraViews", (_app, html) => {
-  const el  = (typeof jQuery !== "undefined" && html instanceof jQuery) ? html[0] : html;
+  // Em ApplicationV2, html é sempre HTMLElement — sem jQuery.
+  // Não usamos document.querySelector como fallback: o elemento correto é o recebido pelo hook.
+  const el  = html instanceof HTMLElement ? html : html?.[0] ?? html;
   const bar = el?.id === "camera-views"
     ? el
-    : (el?.querySelector?.("#camera-views") ?? document.querySelector("#camera-views"));
+    : el?.querySelector?.("#camera-views");
   if (bar) initBar(bar);
 });
 
-Hooks.on("userConnected", (user, connected) => {
-  // Limpeza Oficial individual (se alguém ligar no meio da sessão com dados legados)
-  if (connected && get("hideNoVideo") && game.webrtc?.settings) {
-    try {
-      const current = game.webrtc.settings.getUser(user.id);
-      if (current?.hidden) {
-        game.webrtc.settings.setUser(user.id, { hidden: false });
-      }
-    } catch (e) {
-      // safe fallback se a API sofrer mudanças no Foundry
-    }
-  }
-
+Hooks.on("userConnected", (_user, connected) => {
+  // Só interessa quando um usuário conecta: ao desconectar, o Foundry remove o slot sozinho.
+  if (!connected) return;
   const bar = document.querySelector("#camera-views");
   if (!bar) return;
   const check = () => { applyNoVideoVisibility(bar); attachVideoListeners(bar); };
