@@ -1,5 +1,5 @@
 // ============================================================
-// Resizable Camera Bar — v2.0.55
+// Resizable Camera Bar — v2.0.6
 // ============================================================
 
 const MODULE_ID = "resizable-camera-bar";
@@ -83,6 +83,7 @@ function readmeHTML() {
         <li><strong>Aspect Ratio:</strong> 4:3, 16:9, or Free.
             <em>Note: 16:9 crops images unless your webcam actually streams in widescreen.</em></li>
         <li><strong>Hide Cameras Without Video:</strong> Hides the slot of any user who is connected but not transmitting video. Reacts in real time — no reload needed. Default: off.</li>
+        <li><strong>Warning icon ⚠:</strong> Appears when cameras are hidden — by the module or manually by the GM. Hover over it to see exactly who is hidden and why. Manually hidden users can be shown via the Players list (right-click → Show User).</li>
         <li><strong>Handle Always Visible:</strong> Show the handle without needing to hover.</li>
         <li><strong>Handle & Icon Color:</strong> Hex code field + color swatch — edit the code or click the swatch to open the system color picker.</li>
         <li><strong>Handle Opacity:</strong> Opacity when the handle is visible (0.1 – 1.0).</li>
@@ -310,8 +311,8 @@ function createBarIcons(bar) {
   warn.className = "rcb-warn-btn";
   warn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
   warn.style.cssText = `position:fixed; z-index:${zIdx}; color:${color}; opacity:0.7; display:none;`;
-  warn.addEventListener("mouseenter", () => { warn.style.opacity = "1"; });
-  warn.addEventListener("mouseleave", () => { warn.style.opacity = "0.7"; });
+  warn.addEventListener("mouseenter", () => { warn.style.opacity = "1"; _showWarnTooltip(warn, bar); });
+  warn.addEventListener("mouseleave", () => { warn.style.opacity = "0.7"; _hideWarnTooltip(); });
   warn.addEventListener("click", (e) => {
     e.preventDefault(); e.stopPropagation();
     openModuleSettings();
@@ -323,24 +324,114 @@ function createBarIcons(bar) {
   positionBarIcons(bar);
 }
 
+// ─── Warning tooltip customizado ─────────────────────────────
+
+let _warnTooltip = null;
+
+function _hideWarnTooltip() {
+  _warnTooltip?.remove();
+  _warnTooltip = null;
+}
+
+function _buildWarnData(bar) {
+  // Escondidos pelo módulo: slot existe no DOM com rcb-dynamic-hide
+  const byModule = [];
+  // Escondidos manualmente pelo Foundry ("Hide User" no menu de contexto):
+  //   o Foundry REMOVE o slot do DOM completamente — ao contrário do módulo que preserva o nó.
+  //   Detecção: usuário conectado cujo slot NÃO existe no DOM
+  //   (e não está listado como escondido pelo módulo).
+  //   Não usamos game.webrtc.settings.getUser().hidden — essa flag reflete o estado
+  //   de vídeo nas AVSettings do próprio usuário, não o "Hide User" do GM.
+  const manually = [];
+
+  // Mapa dos slots presentes no DOM: userId → elemento
+  const slotsInDOM = new Map();
+  bar.querySelectorAll(".camera-view[data-user]").forEach(view => {
+    if (view.dataset.user) slotsInDOM.set(view.dataset.user, view);
+  });
+
+  // Classificar: módulo vs manual
+  slotsInDOM.forEach((view, userId) => {
+    if (view.classList.contains("rcb-dynamic-hide")) {
+      byModule.push(game.users.get(userId)?.name ?? userId);
+    }
+  });
+
+  // Usuários conectados sem slot no DOM → escondidos manualmente pelo Foundry
+  game.users.forEach(user => {
+    if (!user.active) return;
+    if (!slotsInDOM.has(user.id)) {
+      manually.push(user.name);
+    }
+  });
+
+  return { byModule, manually };
+}
+
+function _showWarnTooltip(warnBtn, bar) {
+  _hideWarnTooltip();
+
+  const { byModule, manually } = _buildWarnData(bar);
+  if (byModule.length === 0 && manually.length === 0) return;
+
+  const tip = document.createElement("div");
+  tip.className = "rcb-warn-tooltip";
+
+  let html = "";
+
+  if (byModule.length > 0) {
+    html += `<div class="rcb-wt-section">`;
+    html += `<div class="rcb-wt-heading"><i class="fas fa-video-slash"></i> Hidden by module (${byModule.length})</div>`;
+    byModule.forEach(n => { html += `<div class="rcb-wt-row">${n}</div>`; });
+    html += `</div>`;
+  }
+
+  if (manually.length > 0) {
+    if (byModule.length > 0) html += `<div class="rcb-wt-divider"></div>`;
+    html += `<div class="rcb-wt-section">`;
+    html += `<div class="rcb-wt-heading"><i class="fas fa-eye-slash"></i> Hidden manually (${manually.length})</div>`;
+    manually.forEach(n => { html += `<div class="rcb-wt-row">${n}</div>`; });
+    html += `</div>`;
+  }
+
+  tip.innerHTML = html;
+  tip.style.zIndex = warnBtn.style.zIndex;
+  document.body.appendChild(tip);
+  _warnTooltip = tip;
+
+  // Posiciona à direita do botão, ajustando se sair da tela
+  const btnRect  = warnBtn.getBoundingClientRect();
+  const tipW     = 220;
+  const tipH     = tip.offsetHeight || 120;
+  let left = btnRect.right + 6;
+  let top  = btnRect.top;
+
+  if (left + tipW > window.innerWidth)  left = btnRect.left - tipW - 6;
+  if (top  + tipH > window.innerHeight) top  = window.innerHeight - tipH - 8;
+
+  tip.style.left = `${left}px`;
+  tip.style.top  = `${top}px`;
+}
+
 function updateWarningIcon(bar) {
   const icons = getBarIcons(bar);
   if (!icons.warn) return;
 
-  let count = 0;
-  if (get("hideNoVideo")) {
-    bar.querySelectorAll(".camera-view[data-user]").forEach(view => {
-      if (!view.dataset.user) return;
-      if (isCameraOff(view)) count++;
-    });
-  }
+  const { byModule, manually } = _buildWarnData(bar);
+  const total = byModule.length + manually.length;
 
-  if (count > 0) {
-    const plural = count === 1 ? "camera" : "cameras";
-    icons.warn.title = `${count} ${plural} hidden — connected but not transmitting video. Click to change in Settings.`;
+  // Mostra o ícone se há escondidos pelo módulo (quando hideNoVideo está ativo)
+  // OU se há escondidos manualmente (independente da setting)
+  const showByModule = get("hideNoVideo") && byModule.length > 0;
+  const showManually = manually.length > 0;
+
+  if (showByModule || showManually) {
     icons.warn.style.display = "flex";
+    // Atualiza o painel flutuante se já estiver visível
+    if (_warnTooltip) _showWarnTooltip(icons.warn, bar);
   } else {
     icons.warn.style.display = "none";
+    _hideWarnTooltip();
   }
   positionBarIcons(bar);
 }
@@ -855,4 +946,15 @@ Hooks.on("userConnected", (_user, connected) => {
   setTimeout(check, 300);
   setTimeout(check, 1000);
   setTimeout(check, 3000);
+});
+
+// Quando o GM usa "Hide User" / "Show User", o Foundry re-renderiza a camera bar
+// disparando renderCameraViews → initBar → updateWarningIcon automaticamente.
+// Adicionamos clientSettingChanged como fallback para capturar o momento exato
+// em que a setting é salva, antes do re-render.
+Hooks.on("clientSettingChanged", (namespace, key) => {
+  if (namespace !== "core" || key !== "avSettings") return;
+  const bar = document.querySelector("#camera-views");
+  if (!bar) return;
+  setTimeout(() => updateWarningIcon(bar), 100);
 });

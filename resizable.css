@@ -203,6 +203,54 @@ input[type="color"].rcb-color-picker,
 
 .rcb-settings-link i { margin-right: 5px; }
 
+/* ─── Warning tooltip customizado ───────────────────────────── */
+
+.rcb-warn-tooltip {
+  position: fixed;
+  width: 220px;
+  background: #1a1410;
+  border: 1px solid #6a4a2a;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #d4b896;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  pointer-events: none;
+  line-height: 1.5;
+}
+
+.rcb-wt-heading {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #c8a060;
+  margin-bottom: 5px;
+}
+
+.rcb-wt-heading i {
+  margin-right: 4px;
+  opacity: 0.85;
+}
+
+.rcb-wt-row {
+  padding: 1px 0 1px 4px;
+  color: #b8a080;
+  font-size: 13px;
+}
+
+.rcb-wt-divider {
+  border-top: 1px solid #3a2a1a;
+  margin: 8px 0;
+}
+
+.rcb-wt-hint {
+  font-size: 11px;
+  color: #7a6040;
+  line-height: 1.45;
+  font-style: italic;
+}
+
 /* ─── Dynamic Hide ──────────────────────────────────────────
    Usa display: none para colapsar o layout exatamente como a
    função Hide User nativa faz, mas preserva o nó na memória
