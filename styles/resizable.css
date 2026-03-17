@@ -261,7 +261,7 @@ input[type="color"].rcb-color-picker,
 }
 
 /* ─── Horizontal Alignment Fix ──────────────────────────────
-   O 'safe' previne que o flexbox corte a primeira câmera à 
+   O 'safe' previne que o flexbox corte a primeira câmera à
    esquerda e quebre o scrollbar quando a barra estiver cheia.
    ─────────────────────────────────────────────────────────── */
 #camera-views.horizontal > .scrollable {
