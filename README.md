@@ -1,4 +1,4 @@
-# 📷 Resizable Camera – Version 2.0
+# 📷 Resizable Camera – Version 3.0 - verified and adapted for Foundry V14.
 
 <img width="490" height="925" alt="screenshot-logo" src="https://github.com/user-attachments/assets/bf89ae94-98fd-4c37-93b5-18b7c3a52d24" />
 
