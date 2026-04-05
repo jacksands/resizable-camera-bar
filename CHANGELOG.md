@@ -1,5 +1,14 @@
 # Changelog — Resizable Camera Bar
 
+
+
+---
+
+## v3.0.0 — 2026-04-05
+
+- verified and adapted for Foundry V14.
+
+
 ---
 
 ## v2.1.0 — 2026-03-17

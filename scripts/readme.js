@@ -112,7 +112,8 @@ export async function showReadme() {
       // Aplica altura real ao scroll wrapper (padrão learn-002)
       function recalc() {
         const wcEl  = appEl.querySelector(".window-content");
-        const btnEl = appEl.querySelector(".dialog-buttons");
+        // Em V14 DialogV2 o footer é .form-footer; .dialog-buttons era o nome V13.
+        const btnEl = appEl.querySelector(".form-footer") ?? appEl.querySelector(".dialog-buttons");
         const scrEl = appEl.querySelector(".rcb-readme");
         if (!wcEl || !scrEl) return;
         const h = wcEl.clientHeight - (btnEl?.offsetHeight ?? 0);

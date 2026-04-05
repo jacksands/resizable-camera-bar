@@ -111,19 +111,22 @@ input[type="color"].rcb-color-picker,
   letter-spacing: 0.03em;
 }
 
-.rcb-dialog .dialog-buttons {
+.rcb-dialog .dialog-buttons,
+.rcb-dialog .form-footer {
   background: #111 !important;
   border-top: 1px solid #3a3020 !important;
 }
 
-.rcb-dialog .dialog-buttons button {
+.rcb-dialog .dialog-buttons button,
+.rcb-dialog .form-footer button {
   background: #1e1e1e !important;
   border: 1px solid #3a3020 !important;
   color: #c8a060 !important;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.rcb-dialog .dialog-buttons button:hover {
+.rcb-dialog .dialog-buttons button:hover,
+.rcb-dialog .form-footer button:hover {
   background: #2a2010 !important;
   border-color: #c8a060 !important;
   color: #e8c080 !important;
