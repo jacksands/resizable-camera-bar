@@ -143,6 +143,15 @@ Hooks.on("renderCameraViews", (_app, html) => {
   if (bar) initBar(bar);
 });
 
+// Fallback: se renderCameraViews disparou antes da classe de posição ser aplicada
+// (initBar deu giving up), tenta novamente após o canvas terminar de carregar.
+Hooks.on("canvasReady", () => {
+  const bar = document.querySelector("#camera-views");
+  if (!bar) return;
+  // Só reinicializa se o handle ainda não existe — significa que a tentativa anterior falhou.
+  if (!bar.querySelector(".rcb-handle")) initBar(bar);
+});
+
 Hooks.on("userConnected", (_user, connected) => {
   // Só interessa quando um usuário conecta: ao desconectar, o Foundry remove o slot sozinho.
   if (!connected) return;

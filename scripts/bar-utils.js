@@ -15,6 +15,18 @@ export function getPosition(bar) {
   if (bar.classList.contains("right"))  return "right";
   if (bar.classList.contains("top"))    return "top";
   if (bar.classList.contains("bottom")) return "bottom";
+
+  // Fallback: classe ainda não foi aplicada pelo Foundry (comum em V14 sem câmeras ativas).
+  // Lê a posição diretamente das AV settings e aplica a classe para que o módulo funcione.
+  try {
+    const dock = game.webrtc?.settings?.get("client", "dockPosition");
+    const valid = ["left", "right", "top", "bottom"];
+    if (valid.includes(dock)) {
+      bar.classList.add(dock);
+      return dock;
+    }
+  } catch (_) { /* game ainda não pronto */ }
+
   return null;
 }
 
