@@ -138,3 +138,18 @@ export function getBarZIndex(bar) {
   const z = parseInt(window.getComputedStyle(bar).zIndex);
   return isNaN(z) ? 60 : z;
 }
+
+/**
+ * Returns true when AV conferencing is enabled (mode !== 0 / "disabled").
+ * When disabled, the camera bar exists in the DOM but should not be instrumented.
+ * @returns {boolean}
+ */
+export function isAVEnabled() {
+  try {
+    // game.webrtc.mode is the numeric conferencing mode; 0 = disabled.
+    const mode = game.webrtc?.mode ?? game.settings.get("core", "avSettings")?.mode ?? 0;
+    return Number(mode) !== 0;
+  } catch (_) {
+    return false;
+  }
+}

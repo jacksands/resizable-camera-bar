@@ -3,6 +3,7 @@
 // ============================================================
 
 import { debounce } from "./constants.js";
+import { isAVEnabled } from "./bar-utils.js";
 import { get } from "./settings.js";
 import { updateWarningIcon } from "./icons.js";
 
@@ -57,6 +58,8 @@ export function attachVideoListeners(bar) {
  * @returns {void}
  */
 export function applyNoVideoVisibility(bar) {
+  // When AV is disabled there are no camera slots — nothing to do.
+  if (!isAVEnabled()) return;
   const hide = get("hideNoVideo");
   bar.querySelectorAll(".camera-view[data-user]").forEach(view => {
     if (!view.dataset.user) return;

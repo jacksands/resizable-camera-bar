@@ -3,7 +3,7 @@
 // ============================================================
 
 import { get } from "./settings.js";
-import { getPosition, isFoundryMinimized, getBarZIndex } from "./bar-utils.js";
+import { getPosition, isFoundryMinimized, getBarZIndex, isAVEnabled } from "./bar-utils.js";
 import { openModuleSettings } from "./readme.js";
 
 /** @type {WeakMap<HTMLElement, {eye?: HTMLElement, warn?: HTMLElement}>} */
@@ -251,6 +251,14 @@ function _showWarnTooltip(warnBtn, bar) {
 export function updateWarningIcon(bar) {
   const icons = getBarIcons(bar);
   if (!icons.warn) return;
+
+  // AV disabled: no users will have camera slots, so hide the warning unconditionally.
+  if (!isAVEnabled()) {
+    icons.warn.style.display = "none";
+    _hideWarnTooltip();
+    positionBarIcons(bar);
+    return;
+  }
 
   const { byModule, manually } = _buildWarnData(bar);
 

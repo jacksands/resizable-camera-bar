@@ -5,7 +5,7 @@
 import { debounce, MAX_INIT_RETRIES } from "./constants.js";
 import { get } from "./settings.js";
 import {
-  getPosition, isFoundryMinimized, clearInlineSize, applySize, loadSize,
+  getPosition, isFoundryMinimized, clearInlineSize, applySize, loadSize, isAVEnabled,
 } from "./bar-utils.js";
 import { createHandle, positionHandle, _handles } from "./handle.js";
 import { createBarIcons, positionBarIcons } from "./icons.js";
@@ -41,6 +41,12 @@ function cleanupObservers(bar) {
  */
 export function initBar(bar, _retries = 0) {
   if (!bar || bar.id !== "camera-views") return;
+
+  // When AV conferencing is disabled, the bar is empty — no handle or icons needed.
+  if (!isAVEnabled()) {
+    cleanupObservers(bar);
+    return;
+  }
 
   const pos = getPosition(bar);
   if (!pos) {
@@ -144,6 +150,7 @@ export function initBar(bar, _retries = 0) {
  * @returns {void}
  */
 export function initAllBars() {
+  if (!isAVEnabled()) return;
   const bar = document.querySelector("#camera-views");
   if (bar) initBar(bar);
 }

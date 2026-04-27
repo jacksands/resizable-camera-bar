@@ -1,6 +1,15 @@
 # Changelog — Resizable Camera Bar
 
+---
 
+## v3.0.2 — 2026-04-27
+
+### Fixed
+
+- **Icons and handle visible with AV disabled** — when the GM sets *Conferencing Mode* to *Disabled*, the camera bar renders in the DOM but contains no camera slots. The module was still creating the drag handle, the eye icon, and the warning icon in that state. Added `isAVEnabled()` guard (reads `game.webrtc.mode`) that short-circuits `initBar`, `initAllBars`, `applyNoVideoVisibility`, and `updateWarningIcon` when AV is off. On the client side, the bar now remains completely uninstrumented until conferencing is enabled.
+- **Warning icon counted absent users as manually hidden** — with AV disabled, no users have camera slots in the DOM. `_buildWarnData` was interpreting every connected user without a slot as "manually hidden by GM", causing the warning icon to appear for all players. The new `isAVEnabled()` guard prevents this code path from running when AV is off.
+- **`canvasReady` fallback for position class** — added a secondary `Hooks.on("canvasReady")` fallback that re-attempts `initBar` if the position class (`left/right/top/bottom`) was not yet applied to `#camera-views` during `renderCameraViews`. Prevents the *"position class never appeared, giving up"* console warning in environments where another module delays the camera bar's dock class.
+- **AV mode change at runtime** — the `clientSettingChanged` hook now calls `initBar` instead of just `updateWarningIcon` when `core.avSettings` changes, so enabling or disabling conferencing mid-session correctly adds or removes the handle and icons without a page reload.
 
 ---
 
