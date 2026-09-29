@@ -2,6 +2,31 @@
 
 ---
 
+## v3.1.0 - 2026-09-29
+
+### Added
+
+- **Grid Layout**: the camera bar can now show cameras in multiple rows (top/bottom bars) or multiple columns (left/right bars) instead of a single row/column. Off by default; with it off, behavior is unchanged.
+- **Grid toggle icon**: a third icon (▦) in the bar's icon stack, under the 👁 eye and ⚠ warning icons, switches the grid on the fly for the bar's current orientation. Bright with a glow when active, dim when inactive. When ⚠ is hidden, the icon moves up to close the gap.
+- **Grid Options settings** (all `scope: "user"`), grouped under two headers in Module Settings:
+  - Horizontal: *Enable*, *Max Frame Height (px)* (default 150), *Auto-Wrap Rows*.
+  - Vertical: *Enable*, *Max Frame Width (px)* (default 170), *Auto-Wrap Columns*.
+  - The horizontal and vertical toggles are independent. Every change applies immediately, with no reload.
+- **Max frame size**: a taller (horizontal) or wider (vertical) bar gets extra rows/columns, and frames are spread evenly across them.
+- **Auto-Wrap**: ignores the max frame size, keeps frames as large as possible and adds a row/column only when they no longer fit.
+- New module `scripts/grid-layout.js` with the layout engine. Layout is recalculated on bar resize (including dragging the handle), players joining/leaving, cameras hidden/shown, and dock position changes. Frames respect *Minimum Size* and *Camera Aspect Ratio*; the bar scrolls only if the minimum size forces overflow. The vertical grid is centered; the horizontal grid is centered horizontally and top-aligned.
+
+### Changed
+
+- `styles/resizable.css`: added grid-mode rules and the settings section header style. The layout itself is applied inline by `grid-layout.js`.
+- `INSTRUCTIONS.md`, the in-app README dialog and `README.md` now document the Grid Layout.
+
+### Fixed
+
+- The ⚠ icon left an empty gap in the icon stack when no camera was hidden.
+
+---
+
 ## v3.0.2 — 2026-04-27
 
 ### Fixed

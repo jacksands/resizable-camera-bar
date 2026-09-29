@@ -1,8 +1,8 @@
 # Resizable Camera Bar — Instructions
 
-A module for **Foundry VTT v13** that lets you freely resize the camera bar.
+A module for **Foundry VTT v13 and v14** that lets you freely resize the camera bar and, optionally, lay the cameras out in a multi-row or multi-column grid.
 
-The resize handle sits on the **inner edge** of the bar — between the bar and the canvas. An 👁 eye icon and ⚠ warning icon (when cameras are hidden) appear at the outer corner.
+The resize handle sits on the **inner edge** of the bar, between the bar and the canvas. An 👁 eye icon, a ⚠ warning icon (when cameras are hidden) and a ▦ grid toggle icon appear at the outer corner.
 
 ---
 
@@ -13,8 +13,9 @@ The resize handle sits on the **inner edge** of the bar — between the bar and 
 - **Double-click** the handle to reset to the default size
 - Size is **saved per client** and restored on reload
 - Click the 👁 icon to jump directly to Module Settings
+- Click the ▦ icon to turn the Grid Layout on or off (see below)
 
-The eye icon lives at the outer corner of the camera bar and is always visible — never covered by other UI elements.
+The icons live at the outer corner of the camera bar and are always visible and never covered by other UI elements. They stack in this order: 👁, ⚠ (only when someone is hidden), ▦. When ⚠ is not shown, ▦ moves up to sit right under 👁.
 
 ---
 
@@ -48,6 +49,42 @@ All settings are **per user** (each player keeps their own preferences, synchron
 **Handle & Icon Color** — Hex code field + color swatch — edit the code or click the swatch to open the system color picker (default: #c8a060 amber)
 
 **Handle Opacity** — Opacity when visible, 0.1–1.0 (default: 0.7)
+
+**Grid Options: Horizontal Bar (top / bottom)**
+
+- **Horizontal Grid: Enable**: Turns the grid on for top/bottom bars (default: off). Same as the ▦ icon.
+- **Max Frame Height (px)**: Frames never exceed this height; taller bars get extra rows (default: 150)
+- **Auto-Wrap Rows**: Ignores the max height and adds a row only when frames no longer fit (default: off)
+
+**Grid Options: Vertical Bar (left / right)**
+
+- **Vertical Grid: Enable**: Turns the grid on for left/right bars (default: off). Same as the ▦ icon.
+- **Max Frame Width (px)**: Frames never exceed this width; wider bars get extra columns (default: 170)
+- **Auto-Wrap Columns**: Ignores the max width and adds a column only when frames no longer fit (default: off)
+
+Grid changes apply immediately, with no reload.
+
+---
+
+## Grid Layout
+
+By default the bar shows cameras in a single row (top/bottom) or a single column (left/right). The Grid Layout spreads them over several rows or columns, which saves space when many players have their camera on. It is **off by default**; with it off, the bar behaves exactly as before.
+
+### Turning it on
+
+- Click the ▦ icon in the bar's icon stack. It switches the grid for the bar's **current orientation**: horizontal if the bar is at the top/bottom, vertical if it is at the left/right.
+- Or use the **Enable** checkboxes in Module Settings, under *Grid Options*.
+- The icon is bright (with a soft glow) when the grid is on for this orientation and dim when it is off.
+- The two toggles are **independent**: you can use the grid on horizontal bars only, on vertical bars only, or both. The state is saved per user.
+
+### How the grid is calculated
+
+- **Max Frame Height** (horizontal) / **Max Frame Width** (vertical): the biggest a frame is allowed to get. When the bar is taller (horizontal) or wider (vertical) than this, extra rows/columns are added to use the space. Frames are spread evenly, so 4 frames in 2 rows are laid out 2 + 2.
+- **Auto-Wrap**: ignores the max size. Frames stay as large as possible in a single row/column, and a new row/column is added only when they no longer fit. While Auto-Wrap is on, the *Max Frame* value has no effect.
+- Frames follow the **Aspect Ratio** setting and never go below **Minimum Size**. If there are so many cameras that they cannot all fit at the minimum size, the bar scrolls instead of cutting frames off.
+- Placement: the vertical grid is centered in the bar; the horizontal grid is centered horizontally and aligned to the top.
+- The layout is recalculated live when you resize the bar, when players join or leave, when cameras are hidden or shown (including *Hide Cameras Without Video*), and when you change the dock position.
+- Turning the grid off returns to the original single row/column behavior.
 
 ---
 

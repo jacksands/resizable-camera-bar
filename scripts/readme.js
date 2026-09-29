@@ -49,6 +49,19 @@ function readmeHTML() {
         <li><strong>Double-click</strong> the handle to reset to the default size.</li>
         <li>Your size is <strong>saved per client</strong> and restored on reload.</li>
         <li>Click the <i class="fa-regular fa-eye"></i> icon inside the bar controls to open Module Settings directly.</li>
+        <li>Click the <i class="fas fa-border-all"></i> icon (below the eye and warning icons) to turn the <strong>Grid Layout</strong> on or off for the bar's current orientation.</li>
+      </ul>
+    </div>
+    <div class="rcb-readme-section">
+      <div class="rcb-readme-heading"><i class="fas fa-border-all"></i> Grid Layout</div>
+      <p>Shows the cameras in several columns or rows instead of a single one. Off by default; with it off, the bar behaves exactly as before.</p>
+      <ul>
+        <li><strong>Two independent toggles:</strong> <em>Horizontal Grid</em> (top/bottom bars) and <em>Vertical Grid</em> (left/right bars). The <i class="fas fa-border-all"></i> icon switches the one that matches where the bar is docked (bright = on, dim = off). Both can also be set in Module Settings.</li>
+        <li><strong>Max Frame Width / Height:</strong> the biggest a frame may get. A wider (vertical) or taller (horizontal) bar gets extra columns/rows, and frames are spread evenly (4 frames in 2 rows = 2 + 2).</li>
+        <li><strong>Auto-Wrap:</strong> ignores the max size. Frames stay as large as possible and a new column/row is added only when they no longer fit.</li>
+        <li>Recalculates live when you resize the bar, when players join or leave, when cameras are hidden or shown, and when you change the dock position.</li>
+        <li>Frames never go below <strong>Min Size</strong>. If there are too many for that, the bar scrolls. The <strong>Aspect Ratio</strong> setting still applies.</li>
+        <li>The vertical grid is centered in the bar; the horizontal grid is centered horizontally and aligned to the top.</li>
       </ul>
     </div>
     <div class="rcb-readme-section">
@@ -63,6 +76,7 @@ function readmeHTML() {
         <li><strong>Handle Always Visible:</strong> Show the handle without needing to hover.</li>
         <li><strong>Handle & Icon Color:</strong> Hex code field + color swatch — edit the code or click the swatch to open the system color picker.</li>
         <li><strong>Handle Opacity:</strong> Opacity when the handle is visible (0.1 – 1.0).</li>
+        <li><strong>Grid Options:</strong> Horizontal and Vertical groups, each with Enable, Max Frame Height/Width and Auto-Wrap. See <em>Grid Layout</em> above.</li>
       </ul>
     </div>
     <div class="rcb-readme-footer">

@@ -1,34 +1,26 @@
 /* ============================================================
-   Resizable Camera Bar — v2.0.51
+   Resizable Camera Bar — v3.1.0
    ============================================================ */
 
 #camera-views {
   resize: none !important;
 }
 
-/* Native Foundry AV control icons wrap instead of overflow when bar is small */
 #camera-views .user-controls {
   flex-wrap: wrap;
 }
 
-/* Corrigido: regras antes sem escopo — agora restritas ao contexto do módulo.
-   A regra original (#chat-notifications #chat-controls) afetava a UI global do Foundry.
-   Mantida apenas se necessária para layout interno da camera bar. */
 #camera-views ~ #chat-notifications #chat-controls {
   position: static;
 }
 
-/* Corrigido: .split-button.vertical sem escopo afetava qualquer módulo/sistema com essa classe.
-   Restrita ao contexto da camera bar. */
 #camera-views .split-button.vertical {
   writing-mode: horizontal-tb;
 }
 
-/* ─── Resize Handle ─────────────────────────────────────────
+/* ─── Resize Handle ──────────────────────────────────────────
    position:fixed on document.body.
-   z-index set by JS to match the camera bar's own z-index + 1,
-   so it never floats above dialogs or notifications.
-   background-color and opacity are set by JS.
+   z-index, background-color, and opacity set by JS.
    ─────────────────────────────────────────────────────────── */
 
 .rcb-handle {
@@ -37,7 +29,6 @@
   transition: opacity 0.18s ease;
   user-select: none;
   pointer-events: auto;
-  /* z-index set dynamically by JS */
 }
 
 .rcb-handle::after {
@@ -51,14 +42,14 @@
   pointer-events: none;
 }
 
-/* ─── Bar Icons (eye + warning) — position:fixed on body ────────
-   Both icons are positioned by JS via getBoundingClientRect().
-   color, opacity, display are set inline by JS.
-   ─────────────────────────────────────────────────────────────── */
+/* ─── Bar Icons (eye + warning + grid toggle) ────────────────
+   All three are position:fixed on body, sized/positioned by JS.
+   ─────────────────────────────────────────────────────────── */
 
 .rcb-eye-btn,
-.rcb-warn-btn {
-  position: fixed; /* set by JS too, but ensures it if inline is stripped */
+.rcb-warn-btn,
+.rcb-grid-btn {
+  position: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,16 +65,43 @@
 }
 
 .rcb-eye-btn:hover,
-.rcb-warn-btn:hover {
+.rcb-warn-btn:hover,
+.rcb-grid-btn:hover {
   background: rgba(0, 0, 0, 0.35);
 }
 
 .rcb-eye-btn i,
-.rcb-warn-btn i {
+.rcb-warn-btn i,
+.rcb-grid-btn i {
   pointer-events: none;
+  transition: filter 0.15s ease;
 }
 
-/* Native color picker for handleColor setting */
+/* ─── Grid Layout — default horizontal bar fix ──────────────
+   Existing rule for the horizontal bar's scrollable container.
+   ─────────────────────────────────────────────────────────── */
+
+#camera-views.horizontal > .scrollable {
+  display: flex;
+  justify-content: safe center;
+  align-items: center;
+}
+
+/* ─── Grid Layout — active state (rcb-grid-active on bar) ───
+   Layout (CSS grid on the frames' real parent, frame sizes, overflow) is applied
+   entirely by grid-layout.js as inline !important styles. No stylesheet rule may
+   force display/flex on .scrollable here: the frames' parent is not guaranteed to
+   be .scrollable, and forcing flex on a wrapper would break the layout.
+   ─────────────────────────────────────────────────────────── */
+
+#camera-views.rcb-grid-active .camera-view {
+  flex-shrink: 0 !important;
+  flex-grow:   0 !important;
+  flex-basis:  auto !important;
+}
+
+/* ─── Native color picker for handleColor setting ───────────── */
+
 input[type="color"].rcb-color-picker,
 .settings-list input[type="color"] {
   vertical-align: middle;
@@ -91,7 +109,27 @@ input[type="color"].rcb-color-picker,
   background: #1a1a1a;
 }
 
-/* ─── README dialog ─────────────────────────────────────────── */
+/* ─── Settings section headers (grid options grouping) ───────
+   Scoped to the module's own settings tab to avoid leaking.
+   ─────────────────────────────────────────────────────────── */
+
+section[data-tab="resizable-camera-bar"] .rcb-section-header {
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #c8a060;
+  padding: 14px 0 5px;
+  border-bottom: 1px solid #3a3020;
+  margin-bottom: 4px;
+}
+
+section[data-tab="resizable-camera-bar"] .rcb-section-header i {
+  margin-right: 5px;
+  opacity: 0.8;
+}
+
+/* ─── README dialog ──────────────────────────────────────────── */
 
 .rcb-dialog.dialog {
   background: #1a1a1a !important;
@@ -138,11 +176,9 @@ input[type="color"].rcb-color-picker,
   padding: 18px 22px 14px;
   font-size: 14px;
   line-height: 1.7;
-  /* altura e overflow controlados por JS (learn-002) */
   box-sizing: border-box;
 }
 
-/* scrollbar estilizada */
 .rcb-readme::-webkit-scrollbar        { width: 8px; }
 .rcb-readme::-webkit-scrollbar-track  { background: #111; }
 .rcb-readme::-webkit-scrollbar-thumb  { background: #4a3a28; border-radius: 4px; }
@@ -165,13 +201,9 @@ input[type="color"].rcb-color-picker,
 .rcb-readme-heading i { margin-right: 5px; opacity: 0.8; }
 
 .rcb-readme p { margin: 0 0 4px; color: #b8a080; }
-
 .rcb-readme ul { margin: 6px 0 0; padding-left: 20px; }
-
 .rcb-readme ul li { margin-bottom: 6px; color: #b8a080; }
-
 .rcb-readme ul li strong { color: #c8a060; }
-
 .rcb-readme ul li em { color: #8a7055; font-style: italic; }
 
 .rcb-readme-footer {
@@ -206,7 +238,7 @@ input[type="color"].rcb-color-picker,
 
 .rcb-settings-link i { margin-right: 5px; }
 
-/* ─── Warning tooltip customizado ───────────────────────────── */
+/* ─── Warning tooltip ────────────────────────────────────────── */
 
 .rcb-warn-tooltip {
   position: fixed;
@@ -231,10 +263,7 @@ input[type="color"].rcb-color-picker,
   margin-bottom: 5px;
 }
 
-.rcb-wt-heading i {
-  margin-right: 4px;
-  opacity: 0.85;
-}
+.rcb-wt-heading i { margin-right: 4px; opacity: 0.85; }
 
 .rcb-wt-row {
   padding: 1px 0 1px 4px;
@@ -254,21 +283,8 @@ input[type="color"].rcb-color-picker,
   font-style: italic;
 }
 
-/* ─── Dynamic Hide ──────────────────────────────────────────
-   Usa display: none para colapsar o layout exatamente como a
-   função Hide User nativa faz, mas preserva o nó na memória
-   para permitir que o JS reative a câmera quando a mídia voltar.
-   ─────────────────────────────────────────────────────────── */
+/* ─── Dynamic Hide ───────────────────────────────────────────── */
+
 .camera-view.rcb-dynamic-hide {
   display: none !important;
-}
-
-/* ─── Horizontal Alignment Fix ──────────────────────────────
-   O 'safe' previne que o flexbox corte a primeira câmera à
-   esquerda e quebre o scrollbar quando a barra estiver cheia.
-   ─────────────────────────────────────────────────────────── */
-#camera-views.horizontal > .scrollable {
-  display: flex;
-  justify-content: safe center;
-  align-items: center;
 }

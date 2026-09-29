@@ -7,20 +7,18 @@ import {
   getPosition, isVertical, innerEdge, isFoundryMinimized,
   defaultSize, applySize, applyAspectRatio, getBarZIndex, _saveSize,
 } from "./bar-utils.js";
+import { applyGridLayout } from "./grid-layout.js";
 
 /** @type {WeakMap<HTMLElement, HTMLElement>} Maps each bar to its handle element. */
 export const _handles = new WeakMap();
 
 /**
  * Positions the handle element along the inner edge of the bar using fixed coordinates.
- * Hides the handle while the bar is in Foundry's minimized state.
- * Called after every bar resize, window resize, or bar position change.
  * @param {HTMLElement} bar
  * @param {HTMLElement} handle
- * @returns {void}
  */
 export function positionHandle(bar, handle) {
-  const pos  = getPosition(bar);
+  const pos = getPosition(bar);
   if (!pos) return;
 
   if (isFoundryMinimized(bar)) {
@@ -31,7 +29,6 @@ export function positionHandle(bar, handle) {
 
   const edge = innerEdge(pos);
   const rect = bar.getBoundingClientRect();
-
   handle.style.zIndex = String(getBarZIndex(bar) + 1);
 
   if (edge === "right") {
@@ -55,7 +52,7 @@ export function positionHandle(bar, handle) {
     handle.style.width  = `${len}px`;
     handle.style.height = "4px";
     handle.style.cursor = "ns-resize";
-  } else { // top
+  } else {
     const len = Math.round(rect.width * 0.6);
     handle.style.left   = `${rect.left + rect.width / 2 - len / 2}px`;
     handle.style.top    = `${rect.top}px`;
@@ -66,11 +63,8 @@ export function positionHandle(bar, handle) {
 }
 
 /**
- * Creates the resize handle for a bar, removing any previous handle first.
- * Attaches hover, double-click, and drag (mousedown) listeners.
- * Appended to document.body so it is never clipped by the bar's overflow.
+ * Creates the resize handle for a bar. Attaches hover, double-click, and drag listeners.
  * @param {HTMLElement} bar
- * @returns {void}
  */
 export function createHandle(bar) {
   _handles.get(bar)?.remove();
@@ -101,6 +95,7 @@ export function createHandle(bar) {
     const p   = getPosition(bar);
     const def = defaultSize(p);
     applySize(bar, p, def);
+    applyGridLayout(bar);
     _saveSize(p, def);
     positionHandle(bar, handle);
   });
@@ -136,6 +131,8 @@ export function createHandle(bar) {
           bar.style.height = `${newSize}px`;
         }
         applyAspectRatio(bar, newSize);
+        // Re-apply grid immediately so frame sizes track the drag without lag.
+        applyGridLayout(bar);
         _saveSize(p, newSize);
         positionHandle(bar, handle);
       });
