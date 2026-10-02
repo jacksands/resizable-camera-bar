@@ -1,7 +1,6 @@
 # 📷 Resizable Camera – Version 3.1 - verified and adapted for Foundry V14.
 
 ![Downloads](https://img.shields.io/github/downloads/jacksands/resizable-camera-bar/total)
-![Downloads última versão](https://img.shields.io/github/downloads/jacksands/resizable-camera-bar/latest/total)
 ![Stars](https://img.shields.io/github/stars/jacksands/resizable-camera-bar)
 ![Última release](https://img.shields.io/github/v/release/jacksands/resizable-camera-bar)
 ![Issues](https://img.shields.io/github/issues/jacksands/resizable-camera-bar)
