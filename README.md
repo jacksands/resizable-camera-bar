@@ -1,5 +1,8 @@
 # 📷 Resizable Camera – Version 3.1 - verified and adapted for Foundry V14.
 
+![](https://yhype.me/api/profile/Jack_Sands/views)
+
+
 <img width="490" height="925" alt="screenshot-logo" src="https://github.com/user-attachments/assets/bf89ae94-98fd-4c37-93b5-18b7c3a52d24" />
 
 **New in 3.1: Grid Layout.** Show the cameras in multiple rows or columns instead of a single one. See [Grid Layout](#-grid-layout-new-in-31) below.
