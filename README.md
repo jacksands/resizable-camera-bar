@@ -1,7 +1,10 @@
 # 📷 Resizable Camera – Version 3.1 - verified and adapted for Foundry V14.
 
-![](https://komarev.com/ghpvc/?username=jacksands)
-
+![Downloads](https://img.shields.io/github/downloads/jacksands/resizable-camera-bar/total)
+![Downloads última versão](https://img.shields.io/github/downloads/jacksands/resizable-camera-bar/latest/total)
+![Stars](https://img.shields.io/github/stars/jacksands/resizable-camera-bar)
+![Última release](https://img.shields.io/github/v/release/jacksands/resizable-camera-bar)
+![Issues](https://img.shields.io/github/issues/jacksands/resizable-camera-bar)
 
 <img width="490" height="925" alt="screenshot-logo" src="https://github.com/user-attachments/assets/bf89ae94-98fd-4c37-93b5-18b7c3a52d24" />
 
