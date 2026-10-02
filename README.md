@@ -1,6 +1,6 @@
 # 📷 Resizable Camera – Version 3.1 - verified and adapted for Foundry V14.
 
-
+![](https://komarev.com/ghpvc/?username=jacksands)
 
 
 <img width="490" height="925" alt="screenshot-logo" src="https://github.com/user-attachments/assets/bf89ae94-98fd-4c37-93b5-18b7c3a52d24" />
